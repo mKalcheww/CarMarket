@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Публикувай обява{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center text-success mb-5">Публикувай нова обява</h1>
+
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-5">
+            <form id="carForm" method="POST">
+                {{ form.hidden_tag() }}  <!-- ТОВА Е ВСИЧКО ЗА CSRF – НЕ ПИПАЙ НИЩО ДРУГО! -->
+
+                <div class="row g-4">
+                    <div class="col-md-6">{{ form.brand.label(class="fw-bold") }} {{ form.brand(class="form-control form-control-lg") }}</div>
+                    <div class="col-md-6">{{ form.model.label(class="fw-bold") }} {{ form.model(class="form-control form-control-lg") }}</div>
+                    <div class="col-md-4">{{ form.year.label }} {{ form.year(class="form-control form-control-lg") }}</div>
+                    <div class="col-md-4">{{ form.price.label }} {{ form.price(class="form-control form-control-lg") }}</div>
+                    <div class="col-md-4">{{ form.horsepower.label }} {{ form.horsepower(class="form-control form-control-lg") }}</div>
+                    <div class="col-12">{{ form.fuel.label }} {{ form.fuel(class="form-select form-select-lg") }}</div>
+                    <div class="col-12">{{ form.description.label }} {{ form.description(class="form-control", rows=5) }}</div>
+                </div>
+
+                <!-- DRAG & DROP ЗОНА -->
+                <div class="mt-5">
+                    <label class="form-label fw-bold text-warning">Снимки</label>
+                    <div id="dropZone" class="border border-3 border-dashed rounded-4 p-5 text-center bg-light" style="cursor:pointer; min-height: 200px;">
+                        <i class="bi bi-cloud-upload fs-1 text-success"></i>
+                        <p class="lead mt-3">Пусни снимки тук или кликни</p>
+                        <small class="text-muted">JPG, PNG, WebP</small>
+                    </div>
+                    <div id="preview" class="row mt-4 g-3"></div>
+                </div>
+
+                <div class="text-end mt-5">
+                    <button type="submit" class="btn btn-success btn-lg px-5">Публикувай обявата</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let carId = null;
+const dropZone = document.getElementById('dropZone');
+const preview = document.getElementById('preview');
+const form = document.getElementById('carForm');
+
+// Drag & Drop + Click
+dropZone.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.accept = 'image/*';
+    input.onchange = e => handleFiles(e.target.files);
+    input.click();
+});
+
+['dragover', 'dragenter'].forEach(evt => dropZone.addEventListener(evt, e => {
+    e.preventDefault();
+    dropZone.style.backgroundColor = '#d4edda';
+    dropZone.style.borderColor = '#198754';
+}));
+
+['dragleave', 'drop'].forEach(evt => dropZone.addEventListener(evt, e => {
+    e.preventDefault();
+    dropZone.style.backgroundColor = '';
+    dropZone.style.borderColor = '';
+    if (evt === 'drop') handleFiles(e.dataTransfer.files);
+}));
+
+async function handleFiles(files) {
+    for (const file of files) {
+        if (file.type.startsWith('image/')) {
+            await uploadFile(file);
+        }
+    }
+}
+
+async function uploadFile(file) {
+    // Ако колата още не е създадена → създай я
+    if (!carId) {
+        const formData = new FormData(form);
+        const response = await fetch('/add_car', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        carId = data.car_id;
+    }
+
+    // Качване на снимката
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+
+    const csrfToken = document.querySelector('[name="csrf_token"]').value;
+
+    const response = await fetch(`/upload_image/${carId}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+        body: uploadData
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+        const col = document.createElement('div');
+        col.className = 'col-md-3';
+        col.innerHTML = `
+            <div class="card shadow-sm border-0">
+                <img src="${result.url}" class="card-img-top" style="height:200px; object-fit:cover;">
+                <div class="card-body text-center py-2">
+                    <small class="text-muted">${file.name}</small>
+                    ${result.is_main ? '<span class="badge bg-success ms-2">Главна</span>' : ''}
+                </div>
+            </div>
+        `;
+        preview.appendChild(col);
+    }
+}
+
+// При натискане на "Публикувай" → отиваш на обявата
+form.addEventListener('submit', e => {
+    e.preventDefault();
+    if (!carId) {
+        alert('Моля, добави поне една снимка!');
+        return;
+    }
+    window.location.href = `/car/${carId}`;
+});
+</script>
+{% endblock %}

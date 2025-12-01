@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4 text-warning">Вход в системата</h2>
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label") }}
+                        {{ form.username(class="form-control form-control-lg") }}
+                    </div>
+                    <div class="mb-4">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control form-control-lg") }}
+                    </div>
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-warning btn-lg") }}
+                    </div>
+                </form>
+                <div class="text-center mt-4">
+                    <small class="text-muted">
+                        Нямаш профил? <a href="/register" class="text-warning">Регистрирай се</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

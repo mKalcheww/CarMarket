@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Всички обяви – CarMarket{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <h1 class="text-center text-warning mb-5 display-4">Всички обяви</h1>
+
+    {% if cars %}
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for car in cars %}
+        <div class="col">
+            <div class="card h-100 shadow-lg border-0 overflow-hidden hover-shadow">
+                <!-- СНИМКА -->
+                {% if car.images %}
+                    {% set main_img = car.images|selectattr("is_main")|first or car.images[0] %}
+                    <a href="{{ url_for('routes.car_detail', id=car.id) }}">
+                        <img src="{{ url_for('static', filename='uploads/cars/' + main_img.filename) }}"
+                             class="card-img-top"
+                             style="height: 250px; object-fit: cover; transition: transform 0.3s;"
+                             onmouseover="this.style.transform='scale(1.05)'"
+                             onmouseout="this.style.transform='scale(1)'">
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('routes.car_detail', id=car.id) }}">
+                        <div class="bg-secondary d-flex align-items-center justify-content-center text-white"
+                             style="height: 250px;">
+                            <h4>Без снимка</h4>
+                        </div>
+                    </a>
+                {% endif %}
+
+                <!-- ТЯЛО НА КАРТАТА -->
+                <div class="card-body d-flex flex-column bg-dark">
+                    <h5 class="card-title fw-bold">
+                        <a href="{{ url_for('routes.car_detail', id=car.id) }}" class="text-decoration-none text-white">
+                            {{ car.brand }} {{ car.model }} ({{ car.year }})
+                        </a>
+                    </h5>
+                    <p class="text-success fs-3 fw-bold mb-2">{{ car.price|int }} лв.</p>
+                    <p class="text-muted small mb-1">
+                        {% if car.horsepower %}{{ car.horsepower }} к.с. • {% endif %}{{ car.fuel }}
+                    </p>
+                    <small class="text-muted mt-auto">
+                        от {{ car.author.username }} • {{ car.created_at.strftime('%d.%m.%Y') }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <h2 class="text-muted">Още няма обяви</h2>
+        <a href="{{ url_for('routes.add_car') }}" class="btn btn-success btn-lg mt-4">
+            Бъди първият!
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.hover-shadow:hover { 
+    transform: translateY(-10px); 
+    box-shadow: 0 20px 40px rgba(0, 255, 0, 0.2) !important; 
+    transition: all 0.3s;
+}
+</style>
+{% endblock %}
