@@ -3,17 +3,17 @@
 
 {% block content %}
 
-<!-- HERO – ИСТИНСКИ ПЪЛНОЕКРАНЕН, БЕЗ ОГРАНИЧЕНИЯ -->
+<!-- HERO – ПЪЛНОЕКРАНЕН + БУТОН ЗА ТЪРСЕНЕ -->
 <section class="hero-fullscreen">
-    <!-- Фон (видео или снимка) -->
+    <!-- Фон видео/снимка -->
     <video autoplay muted loop playsinline class="hero-bg" poster="{{ url_for('static', filename='images/hero.jpg') }}">
         <source src="{{ url_for('static', filename='videos/hero.mp4') }}" type="video/mp4">
     </video>
 
-    <!-- Тъмен оувърлей за по-добър контраст -->
+    <!-- Тъмен оувърлей -->
     <div class="hero-overlay"></div>
 
-    <!-- СЪДЪРЖАНИЕТО – без container, без padding! -->
+    <!-- СЪДЪРЖАНИЕ -->
     <div class="hero-content-wrapper">
         <div class="hero-text">
             <h1 class="display-1 fw-bold mb-4 animate__animated animate__fadeInUp">
@@ -22,12 +22,17 @@
             <p class="lead fs-2 mb-5 opacity-90 animate__animated animate__fadeInUp animate__delay-1s">
                 Над 800 проверени обяви • Честни километри • Гарантирано качество
             </p>
+
+            <!-- ДВАТА БУТОНА – НОВИЯТ Е ПЪРВИЯТ! -->
             <div class="animate__animated animate__fadeInUp animate__delay-2s">
-                <a href="#latest-cars" class="btn btn-success btn-lg px-5 py-4 rounded-pill shadow-lg fw-bold fs-3 me-4">
-                    Разгледай обяви
+                <!-- НОВ БУТОН – КЪМ ТЪРСАЧКАТА -->
+                <a href="{{ url_for('routes.search') }}" class="btn btn-success btn-lg px-5 py-4 rounded-pill shadow-lg fw-bold fs-3 me-4">
+                    Разширено търсене
                 </a>
-                <a href="{{ url_for('routes.add_car') }}" class="btn btn-outline-light btn-lg px-5 py-4 rounded-pill fw-bold fs-3">
-                    Качи обява
+
+                <!-- СТАРИЯТ – КЪМ ПОСЛЕДНИТЕ ОБЯВИ -->
+                <a href="#latest-cars" class="btn btn-outline-light btn-lg px-5 py-4 rounded-pill fw-bold fs-3">
+                    Последни обяви
                 </a>
             </div>
         </div>

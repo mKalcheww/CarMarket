@@ -1,5 +1,5 @@
 # app/routes.py
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, current_app, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, current_app, jsonify, request
 from flask_login import login_user, logout_user, login_required, current_user
 from .models import User, Car, CarImage, db
 from .forms import RegisterForm, LoginForm, CarForm
@@ -151,3 +151,37 @@ def delete_car(id):
     db.session.commit()
     flash('Обявата е изтрита успешно', 'success')
     return redirect(url_for('routes.my_cars') if car.user_id == current_user.id else url_for('routes.index'))
+
+@bp.route('/search')
+def search():
+    query = Car.query
+
+    # Филтри
+    if request.args.get('brand'):
+        query = query.filter(Car.brand == request.args.get('brand'))
+    if request.args.get('model'):
+        query = query.filter(Car.model == request.args.get('model'))
+    if request.args.get('price_min'):
+        query = query.filter(Car.price >= int(request.args.get('price_min')))
+    if request.args.get('price_max'):
+        query = query.filter(Car.price <= int(request.args.get('price_max')))
+    if request.args.get('year_min'):
+        query = query.filter(Car.year >= int(request.args.get('year_min')))
+    if request.args.get('year_max'):
+        query = query.filter(Car.year <= int(request.args.get('year_max')))
+    if request.args.get('fuel'):
+        query = query.filter(Car.fuel == request.args.get('fuel'))
+
+    # Сортиране
+    sort = request.args.get('sort', 'latest')
+    if sort == 'price_asc':
+        query = query.order_by(Car.price.asc())
+    elif sort == 'price_desc':
+        query = query.order_by(Car.price.desc())
+    elif sort == 'oldest':
+        query = query.order_by(Car.created_at.asc())
+    else:
+        query = query.order_by(Car.created_at.desc())
+
+    cars = query.all()
+    return render_template('search.html', cars=cars, sort=sort)
