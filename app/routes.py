@@ -66,43 +66,71 @@ from werkzeug.utils import secure_filename
 def add_car():
     form = CarForm()
 
-    # AJAX заявка от JavaScript – пропускаме CSRF проверка само тук
+    # AJAX заявка – заобикаляме CSRF
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        # Ръчно попълваме формата от request.form (защото FormData не праща csrf)
         form = CarForm(request.form)
-        # Заобикаляме CSRF за този случай
-        form.csrf_token.current_token = 'bypass'
+        # Пропускаме CSRF проверка за AJAX
+        form.csrf_token.data = None
+        csrf_valid = True
+    else:
+        csrf_valid = form.validate_on_submit()
 
-    if request.method == 'POST' and form.validate():
-        car = Car(
-            brand=form.brand.data,
-            model=form.model.data,
-            year=form.year.data,
-            price=form.price.data,
-            horsepower=form.horsepower.data,
-            engine_size=form.engine_size.data,
-            fuel=form.fuel.data,
-            mileage=form.mileage.data,
-            transmission=form.transmission.data,
-            color=form.color.data,
-            doors=form.doors.data,
-            condition=form.condition.data,
-            description=form.description.data or '',
-            user_id=current_user.id
-        )
-        db.session.add(car)
-        db.session.commit()
-
-        # Винаги връщаме JSON само при AJAX
+    if request.method == 'POST':
+        # За AJAX – валидираме ръчно
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            if not all([
+                form.brand.data, form.model.data, form.year.data, form.price.data,
+                form.horsepower.data, form.engine_size.data, form.fuel.data,
+                form.mileage.data, form.transmission.data, form.color.data,
+                form.doors.data, form.condition.data
+            ]):
+                return jsonify({'success': False, 'errors': {'form': ['Попълни всички задължителни полета!']}}), 400
+
+            # Създаваме колата
+            car = Car(
+                brand=form.brand.data,
+                model=form.model.data,
+                year=form.year.data,
+                price=form.price.data,
+                horsepower=form.horsepower.data,
+                engine_size=form.engine_size.data,
+                fuel=form.fuel.data,
+                mileage=form.mileage.data,
+                transmission=form.transmission.data,
+                color=form.color.data,
+                doors=form.doors.data,
+                condition=form.condition.data,
+                description=form.description.data or '',
+                user_id=current_user.id
+            )
+            db.session.add(car)
+            db.session.commit()
             return jsonify({'success': True, 'car_id': car.id})
 
-        flash('Обявата е публикувана успешно!', 'success')
-        return redirect(url_for('routes.car_detail', id=car.id))
+        # Нормално POST
+        if form.validate_on_submit():
+            car = Car(
+                brand=form.brand.data,
+                model=form.model.data,
+                year=form.year.data,
+                price=form.price.data,
+                horsepower=form.horsepower.data,
+                engine_size=form.engine_size.data,
+                fuel=form.fuel.data,
+                mileage=form.mileage.data,
+                transmission=form.transmission.data,
+                color=form.color.data,
+                doors=form.doors.data,
+                condition=form.condition.data,
+                description=form.description.data or '',
+                user_id=current_user.id
+            )
+            db.session.add(car)
+            db.session.commit()
+            flash('Обявата е публикувана успешно!', 'success')
+            return redirect(url_for('routes.car_detail', id=car.id))
 
-    # Ако има грешки при AJAX – връщаме ги
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify({'success': False, 'errors': form.errors}), 400
+        flash('Попълни всички задължителни полета!', 'danger')
 
     return render_template('add_car.html', form=form)
 

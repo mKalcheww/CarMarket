@@ -128,7 +128,8 @@
         // ПЪРВО СЪЗДАВАМЕ ОБЯВАТА
         if (!carId) {
             const formData = new FormData(document.getElementById('carForm'));
-            formData.delete('submit'); // само това трием
+            formData.delete('submit');
+            formData.delete('csrf_token'); 
 
             const response = await fetch('/add_car', {
                 method: 'POST',
