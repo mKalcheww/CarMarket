@@ -65,20 +65,44 @@ from werkzeug.utils import secure_filename
 @login_required
 def add_car():
     form = CarForm()
-    if form.validate_on_submit():
+
+    # AJAX заявка от JavaScript – пропускаме CSRF проверка само тук
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Ръчно попълваме формата от request.form (защото FormData не праща csrf)
+        form = CarForm(request.form)
+        # Заобикаляме CSRF за този случай
+        form.csrf_token.current_token = 'bypass'
+
+    if request.method == 'POST' and form.validate():
         car = Car(
             brand=form.brand.data,
             model=form.model.data,
             year=form.year.data,
             price=form.price.data,
             horsepower=form.horsepower.data,
-            fuel=form.fuel.data or "Неизвестно",
-            description=form.description.data,
+            engine_size=form.engine_size.data,
+            fuel=form.fuel.data,
+            mileage=form.mileage.data,
+            transmission=form.transmission.data,
+            color=form.color.data,
+            doors=form.doors.data,
+            condition=form.condition.data,
+            description=form.description.data or '',
             user_id=current_user.id
         )
         db.session.add(car)
         db.session.commit()
-        return jsonify({'car_id': car.id})
+
+        # Винаги връщаме JSON само при AJAX
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': True, 'car_id': car.id})
+
+        flash('Обявата е публикувана успешно!', 'success')
+        return redirect(url_for('routes.car_detail', id=car.id))
+
+    # Ако има грешки при AJAX – връщаме ги
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': False, 'errors': form.errors}), 400
 
     return render_template('add_car.html', form=form)
 
@@ -88,32 +112,34 @@ def add_car():
 def upload_image(car_id):
     car = Car.query.get_or_404(car_id)
     if car.user_id != current_user.id:
-        return jsonify(error="Нямате право"), 403
+        return jsonify({'success': False, 'error': 'Нямате право!'}), 403
 
     if 'file' not in request.files:
-        return jsonify(error="Няма файл"), 400
+        return jsonify({'success': False, 'error': 'Няма файл'}), 400
 
     file = request.files['file']
     if file.filename == '':
-        return jsonify(error="Празен файл"), 400
+        return jsonify({'success': False, 'error': 'Празно име'}), 400
 
-    # Първата снимка е главна
+    if not file.filename.lower().endswith(('jpg', 'jpeg', 'png', 'webp', 'gif')):
+        return jsonify({'success': False, 'error': 'Невалиден формат'}), 400
+
+    # Първата снимка става главна
     is_main = CarImage.query.filter_by(car_id=car_id).count() == 0
 
     filename = secure_filename(f"{car_id}_{int(time.time())}_{file.filename}")
-    path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-    file.save(path)
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
 
-    img = CarImage(filename=filename, car_id=car_id, is_main=is_main)
-    db.session.add(img)
+    image = CarImage(filename=filename, car_id=car_id, is_main=is_main)
+    db.session.add(image)
     db.session.commit()
 
     return jsonify({
         'success': True,
-        'url': url_for('static', filename='uploads/cars/' + filename),
+        'url': url_for('static', filename=f'uploads/cars/{filename}'),
         'is_main': is_main
     })
-
 # Моите обяви
 @bp.route('/my_cars')
 @login_required

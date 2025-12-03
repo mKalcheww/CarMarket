@@ -3,32 +3,32 @@
 
 {% block content %}
 
-<!-- HERO ЗА ТЪРСЕНЕТО -->
+<!-- HERO -->
 <section class="py-5 bg-dark text-white">
     <div class="container">
         <div class="row">
-            <div class="col-lg-8 mx-auto text-center">
+            <div class="col-lg-10 mx-auto text-center">
                 <h1 class="display-4 fw-bold">Намери своята кола</h1>
-                <p class="lead">Над 800 обяви • Винаги актуални • Честни километри</p>
+                <p class="lead opacity-90">Над 800 проверени обяви • Честни километри • Гарантирано качество</p>
             </div>
         </div>
     </div>
 </section>
 
 <!-- ФИЛТРИ + РЕЗУЛТАТИ -->
-<section class="py-5">
+<section class="py-5 bg-light">
     <div class="container">
         <div class="row">
 
             <!-- ЛЯВА КОЛОНА – ФИЛТРИ -->
-            <div class="col-lg-3">
+            <div class="col-lg-3 mb-4">
                 <form id="searchForm" method="GET">
                     <div class="card border-0 shadow-sm sticky-top" style="top: 100px;">
                         <div class="card-body">
 
-                            <h5 class="fw-bold mb-4 text-success">Филтри</h5>
+                            <h5 class="fw-bold mb-4 text-success">Филтри за търсене</h5>
 
-                            <!-- Марка и модел -->
+                            <!-- Марка -->
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Марка</label>
                                 <select name="brand" class="form-select" id="brandSelect">
@@ -36,47 +36,83 @@
                                     <!-- Ще се зареди с JS -->
                                 </select>
                             </div>
-                            <div class="mb-3">
+
+                            <!-- Модел -->
+                            <div class="mb-4">
                                 <label class="form-label fw-bold">Модел</label>
                                 <select name="model" class="form-select" id="modelSelect">
-                                    <option value="">Първо избери марка</option>
+                                    <option value="">Избери марка</option>
                                 </select>
                             </div>
 
                             <!-- Цена -->
                             <div class="mb-4">
                                 <label class="form-label fw-bold">Цена (лв.)</label>
-                                <div class="row">
-                                    <div class="col-6"><input type="number" name="price_min" class="form-control" placeholder="От"></div>
-                                    <div class="col-6"><input type="number" name="price_max" class="form-control" placeholder="До"></div>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="number" name="price_min" class="form-control" placeholder="От" value="{{ request.args.get('price_min') }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" name="price_max" class="form-control" placeholder="До" value="{{ request.args.get('price_max') }}">
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Година -->
                             <div class="mb-4">
                                 <label class="form-label fw-bold">Година</label>
-                                <div class="row">
-                                    <div class="col-6"><input type="number" name="year_min" class="form-control" placeholder="От" min="1980"></div>
-                                    <div class="col-6"><input type="number" name="year_max" class="form-control" placeholder="До" max="2026"></div>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="number" name="year_min" class="form-control" placeholder="От" min="1980" value="{{ request.args.get('year_min') }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" name="year_max" class="form-control" placeholder="До" max="2026" value="{{ request.args.get('year_max') }}">
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Пробег -->
                             <div class="mb-4">
                                 <label class="form-label fw-bold">Пробег до (км)</label>
-                                <input type="number" name="mileage_max" class="form-control" placeholder="напр. 200000">
+                                <input type="number" name="mileage_max" class="form-control" placeholder="напр. 200000" value="{{ request.args.get('mileage_max') }}">
                             </div>
 
-                            <!-- Двигател -->
+                            <!-- Кубатура -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Кубатура (ccm)</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="number" name="engine_min" class="form-control" placeholder="От" value="{{ request.args.get('engine_min') }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" name="engine_max" class="form-control" placeholder="До" value="{{ request.args.get('engine_max') }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Конски сили -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Конски сили</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="number" name="hp_min" class="form-control" placeholder="От" value="{{ request.args.get('hp_min') }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" name="hp_max" class="form-control" placeholder="До" value="{{ request.args.get('hp_max') }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Гориво -->
                             <div class="mb-4">
                                 <label class="form-label fw-bold">Гориво</label>
                                 <select name="fuel" class="form-select">
                                     <option value="">Всички</option>
-                                    <option value="Бензин">Бензин</option>
-                                    <option value="Дизел">Дизел</option>
-                                    <option value="Електрически">Електрически</option>
-                                    <option value="Хибрид">Хибрид</option>
-                                    <option value="Пропан-бутан">LPG</option>
+                                    <option value="Бензин" {% if request.args.get('fuel')=='Бензин' %}selected{% endif %}>Бензин</option>
+                                    <option value="Дизел" {% if request.args.get('fuel')=='Дизел' %}selected{% endif %}>Дизел</option>
+                                    <option value="Електрически" {% if request.args.get('fuel')=='Електрически' %}selected{% endif %}>Електрически</option>
+                                    <option value="Хибрид" {% if request.args.get('fuel')=='Хибрид' %}selected{% endif %}>Хибрид</option>
+                                    <option value="Пропан-бутан" {% if request.args.get('fuel')=='Пропан-бутан' %}selected{% endif %}>LPG</option>
                                 </select>
                             </div>
 
@@ -85,30 +121,38 @@
                                 <label class="form-label fw-bold">Скоростна кутия</label>
                                 <select name="transmission" class="form-select">
                                     <option value="">Всички</option>
-                                    <option value="Ръчна">Ръчна</option>
-                                    <option value="Автоматична">Автоматична</option>
+                                    <option value="Ръчна" {% if request.args.get('transmission')=='Ръчна' %}selected{% endif %}>Ръчна</option>
+                                    <option value="Автоматична" {% if request.args.get('transmission')=='Автоматична' %}selected{% endif %}>Автоматична</option>
                                 </select>
                             </div>
 
-                            <!-- Бутон -->
-                            <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">
-                                ТЪРСИ СЕГА
-                            </button>
-                            <a href="{{ url_for('routes.search') }}" class="btn btn-outline-secondary w-100 mt-2">Изчисти филтрите</a>
+                            <!-- Цвят -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Цвят</label>
+                                <input type="text" name="color" class="form-control" placeholder="напр. Черен" value="{{ request.args.get('color') }}">
+                            </div>
+
+                            <!-- Бутони -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg fw-bold">ТЪРСИ СЕГА</button>
+                                <a href="{{ url_for('routes.search') }}" class="btn btn-outline-secondary">Изчисти всичко</a>
+                            </div>
                         </div>
                     </div>
                 </form>
             </div>
 
-            <!-- ДЯСНА КОЛОНА – РЕЗУЛТАТИ -->
+            <!-- РЕЗУЛТАТИ -->
             <div class="col-lg-9">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <p class="mb-0">Намерени: <strong>{{ cars|length }} обяви</strong></p>
-                    <select class="form-select w-auto" onchange="location = this.value;">
-                        <option value="?sort=latest" {% if sort == 'latest' %}selected{% endif %}>Най-нови</option>
-                        <option value="?sort=oldest" {% if sort == 'oldest' %}selected{% endif %}>Най-стари</option>
-                        <option value="?sort=price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Цена: ниска → висока</option>
-                        <option value="?sort=price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Цена: висока → ниска</option>
+                    <h5 class="mb-0 text-success fw-bold">
+                        Намерени: <strong class="text-dark">{{ cars|length }}</strong> обяви
+                    </h5>
+                    <select class="form-select w-auto" onchange="location = this.value + window.location.search.replace(/([&?]sort=)[^\&]+/, '$1' + this.value)">
+                        <option value="latest" {% if sort == 'latest' %}selected{% endif %}>Най-нови</option>
+                        <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Цена: ниска → висока</option>
+                        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Цена: висока → ниска</option>
+                        <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Най-стари</option>
                     </select>
                 </div>
 
@@ -117,16 +161,23 @@
                         {% for car in cars %}
                             {% set main_img = car.images | selectattr("is_main") | first %}
                             <div class="col">
-                                <article class="car-card">
-                                    <a href="{{ url_for('routes.car_detail', id=car.id) }}" class="text-decoration-none">
-                                        <div class="car-img-wrapper">
+                                <article class="car-card shadow-sm">
+                                    <a href="{{ url_for('routes.car_detail', id=car.id) }}" class="text-decoration-none text-dark">
+                                        <div class="car-img-wrapper position-relative overflow-hidden rounded-top">
                                             <img src="{{ url_for('static', filename='uploads/cars/' + (main_img.filename if main_img else 'placeholder.jpg')) }}"
-                                                 alt="{{ car.brand }} {{ car.model }}" class="car-img">
-                                            <div class="car-price-badge">{{ "{:,.0f}".format(car.price) }} лв.</div>
+                                                 alt="{{ car.brand }} {{ car.model }}" class="car-img w-100">
+                                            <div class="car-price-badge position-absolute bottom-0 end-0 m-3 px-3 py-2 bg-success text-white rounded-pill fw-bold shadow">
+                                                {{ "{:,.0f}".format(car.price) }} лв.
+                                            </div>
                                         </div>
-                                        <div class="car-body">
-                                            <h3 class="car-title">{{ car.brand }} {{ car.model }}</h3>
-                                            <p class="car-specs">{{ car.year }} г. • {{ car.horsepower or "-" }} к.с. • {{ car.fuel or "—" }}</p>
+                                        <div class="p-3">
+                                            <h3 class="h5 fw-bold mb-1">{{ car.brand }} {{ car.model }}</h3>
+                                            <p class="text-muted small mb-2">
+                                                {{ car.year }} г. • {{ car.mileage|default(0)|int }} км • {{ car.horsepower }} к.с.
+                                            </p>
+                                            <p class="text-success small fw-bold">
+                                                {{ car.fuel }} • {{ car.engine_size }} ccm • {{ car.transmission }}
+                                            </p>
                                         </div>
                                     </a>
                                 </article>
@@ -135,7 +186,8 @@
                     {% else %}
                         <div class="col-12 text-center py-5">
                             <h3 class="text-muted">Няма намерени обяви</h3>
-                            <a href="{{ url_for('routes.search') }}" class="btn btn-success mt-3">Премахни филтрите</a>
+                            <p class="text-muted">Опитай с по-широки филтри</p>
+                            <a href="{{ url_for('routes.search') }}" class="btn btn-success btn-lg mt-3">Виж всички обяви</a>
                         </div>
                     {% endif %}
                 </div>
@@ -144,38 +196,12 @@
     </div>
 </section>
 
-<!-- JS за динамично зареждане на модели -->
-<script>
-document.getElementById('brandSelect').addEventListener('change', function() {
-    const brand = this.value;
-    const modelSelect = document.getElementById('modelSelect');
-    if (!brand) {
-        modelSelect.innerHTML = '<option value="">Първо избери марка</option>';
-        return;
-    }
-    fetch(`/api/models/${brand}`)
-        .then(r => r.json())
-        .then(models => {
-            modelSelect.innerHTML = '<option value="">Всички модели</option>';
-            models.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m; opt.textContent = m;
-                modelSelect.appendChild(opt);
-            });
-        });
-});
-</script>
-
 <style>
-.car-card {background:white;border-radius:18px;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.1);transition:all .3s}
-.car-card:hover {transform:translateY(-12px);box-shadow:0 20px 40px rgba(0,0,0,0.18)}
-.car-img-wrapper{position:relative;overflow:hidden}
-.car-img{width:100%;height:210px;object-fit:cover;transition:.5s}
-.car-card:hover .car-img{transform:scale(1.08)}
-.car-price-badge{position:absolute;bottom:12px;right:12px;background:#00bf63;color:white;padding:8px 16px;border-radius:50px;font-weight:bold;font-size:1.1rem;box-shadow:0 4px 15px rgba(0,191,99,.5)}
-.car-body{padding:18px}
-.car-title{font-size:1.3rem;font-weight:700;color:#1a1a1a;margin-bottom:6px}
-.car-specs{color:#555;font-size:0.95rem}
+.car-card {background:white;border-radius:18px;overflow:hidden;transition:all .3s ease;height:100%;display:flex;flex-direction:column}
+.car-card:hover {transform:translateY(-10px);box-shadow:0 20px 40px rgba(0,0,0,0.15)!important}
+.car-img {height:220px;object-fit:cover;transition:transform .6s ease}
+.car-card:hover .car-img {transform:scale(1.07)}
+.car-price-badge {font-size:1.15rem!important}
 </style>
 
 {% endblock %}

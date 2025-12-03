@@ -11,11 +11,18 @@ class User(UserMixin, db.Model):
 class Car(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     brand = db.Column(db.String(50), nullable=False)
-    model = db.Column(db.String(50), nullable=False)
+    model = db.Column(db.String(100), nullable=False)
     year = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    horsepower = db.Column(db.Integer)
-    fuel = db.Column(db.String(20))
+    price = db.Column(db.Integer, nullable=False)
+    horsepower = db.Column(db.Integer, nullable=False)
+    fuel = db.Column(db.String(30), nullable=False)  # Бензин, Дизел, Електро, Хибрид, LPG
+    mileage = db.Column(db.Integer, nullable=False)  # пробег в км
+    engine_size = db.Column(db.Integer, nullable=False)  # кубатура в ccm
+    transmission = db.Column(db.String(20), nullable=False)  # Ръчна / Автоматична
+    color = db.Column(db.String(30), nullable=False)
+    euro_standard = db.Column(db.String(10))  # Euro 1–6, не е задължително
+    doors = db.Column(db.Integer, nullable=False)  # 2/3, 4/5
+    condition = db.Column(db.String(20), nullable=False, default="Употребявана")  # Нова, Употребявана, За части
     description = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
