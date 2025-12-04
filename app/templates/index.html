@@ -1,169 +1,124 @@
 {% extends "base.html" %}
-{% block title %}CarMarket – Намери мечтаната си кола{% endblock %}
+{% block title %}CarMarket – Най-добрите обяви в България{% endblock %}
 
 {% block content %}
 
-<!-- HERO – ПЪЛНОЕКРАНЕН + БУТОН ЗА ТЪРСЕНЕ -->
-<section class="hero-fullscreen">
-    <!-- Фон видео/снимка -->
-    <video autoplay muted loop playsinline class="hero-bg" poster="{{ url_for('static', filename='images/hero.jpg') }}">
-        <source src="{{ url_for('static', filename='videos/hero.mp4') }}" type="video/mp4">
-    </video>
+<!-- HERO СЕКЦИЯ – ВИДЕОТО ЗАЕМА ЦЕЛИЯ ЕКРАН БЕЗ ЧЕРНИ ЛЕНТИ -->
+<section class="hero-video-section position-relative overflow-hidden vh-100">
+    <video autoplay muted loop playsinline id="heroVideo"
+       class="hero-video position-absolute top-0 start-0 w-100 h-100">
+    <source src="{{ url_for('static', filename='video/hero.mp4') }}" type="video/mp4">
+</video>
 
-    <!-- Тъмен оувърлей -->
-    <div class="hero-overlay"></div>
-
-    <!-- СЪДЪРЖАНИЕ -->
-    <div class="hero-content-wrapper">
-        <div class="hero-text">
-            <h1 class="display-1 fw-bold mb-4 animate__animated animate__fadeInUp">
-                Намери колата,<br>която те чака
-            </h1>
-            <p class="lead fs-2 mb-5 opacity-90 animate__animated animate__fadeInUp animate__delay-1s">
-                Над 800 проверени обяви • Честни километри • Гарантирано качество
-            </p>
-
-            <!-- ДВАТА БУТОНА – НОВИЯТ Е ПЪРВИЯТ! -->
-            <div class="animate__animated animate__fadeInUp animate__delay-2s">
-                <!-- НОВ БУТОН – КЪМ ТЪРСАЧКАТА -->
-                <a href="{{ url_for('routes.search') }}" class="btn btn-success btn-lg px-5 py-4 rounded-pill shadow-lg fw-bold fs-3 me-4">
-                    Разширено търсене
+    <!-- Тъмен оверлей + текст -->
+    <div class="hero-overlay position-absolute top-0 start-0 w-100 h-100"></div>
+    
+    <div class="container position-relative z-3 h-100 d-flex align-items-center justify-content-center text-center">
+        <div class="text-white px-4">
+            <h1 class="display-1 fw-black mb-3 text-shadow">CarMarket</h1>
+            <p class="lead fs-2 mb-5 text-shadow opacity-95">Най-добрите обяви в България</p>
+            <div class="d-flex gap-4 justify-content-center flex-wrap">
+                <a href="/search" class="btn btn-success btn-lg px-5 py-4 fs-3 fw-bold shadow-lg hover-lift">
+                    Виж всички обяви
                 </a>
-
-                <!-- СТАРИЯТ – КЪМ ПОСЛЕДНИТЕ ОБЯВИ -->
-                <a href="#latest-cars" class="btn btn-outline-light btn-lg px-5 py-4 rounded-pill fw-bold fs-3">
-                    Последни обяви
+                <a href="/add_car" class="btn btn-outline-light btn-lg px-5 py-4 fs-4 fw-bold hover-lift">
+                    + Качи обява
                 </a>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ПОСЛЕДНИ ОБЯВИ – вече нормално с container -->
-<section class="py-5 bg-light" id="latest-cars">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="display-4 fw-bold text-dark">Току-що добавени</h2>
-            <p class="lead text-muted">Най-горещите оферти в момента</p>
-        </div>
+<!-- ПОСЛЕДНИ ОБЯВИ -->
+<div class="container py-5 my-5">
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold text-success">Последни обяви</h2>
+        <p class="lead text-muted">Най-новите коли на пазара</p>
+    </div>
 
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
-            {% for car in cars %}
-                {% set main_img = car.images | selectattr("is_main") | first %}
-                <div class="col">
-                    <article class="car-card">
-                        <a href="{{ url_for('routes.car_detail', id=car.id) }}" class="text-decoration-none">
-                            <div class="car-img-wrapper">
-                                <img src="{{ url_for('static', filename='uploads/cars/' + (main_img.filename if main_img else 'placeholder.jpg')) }}"
-                                     alt="{{ car.brand }} {{ car.model }}" class="car-img">
-                                <div class="car-price-badge">{{ "{:,.0f}".format(car.price) }} лв.</div>
-                            </div>
-                            <div class="car-body">
-                                <h3 class="car-title">{{ car.brand }} {{ car.model }}</h3>
-                                <p class="car-specs mb-2">
-                                    {{ car.year }} г. • {{ car.horsepower or "—" }} к.с. • {{ car.fuel or "—" }}
-                                </p>
-                                <p class="text-muted small">
-                                    {{ car.created_at.strftime('%d %B %Y') }}
-                                </p>
-                            </div>
-                        </a>
-                    </article>
-                </div>
-            {% else %}
-                <div class="col-12 text-center py-5">
-                    <h3 class="text-muted">Още няма обяви</h3>
-                    <a href="{{ url_for('routes.add_car') }}" class="btn btn-success btn-lg mt-3">Бъди първият</a>
-                </div>
-            {% endfor %}
-        </div>
+    {% if cars %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        {% for car in cars %}
+        <div class="col">
+            <a href="/car/{{ car.id }}" class="text-decoration-none">
+                <div class="card bg-dark border-0 shadow-lg overflow-hidden rounded-4 h-100 hover-card">
 
-        <div class="text-center mt-5">
-            <a href="{{ url_for('routes.search') }}" class="btn btn-outline-success btn-lg px-5 py-3 rounded-pill fw-bold">
-                Виж всички обяви
+                    {% if car.images|length > 0 %}
+                        {% set main_img = car.images|selectattr("is_main")|first or car.images[0] %}
+                        <div class="position-relative">
+                            <img src="{{ url_for('static', filename='uploads/cars/' + main_img.filename) }}"
+                                 class="card-img-top" style="height: 240px; object-fit: cover;" alt="{{ car.brand }} {{ car.model }}">
+                            <div class="position-absolute top-0 end-0 m-3">
+                                <span class="badge bg-success fs-6">Ново</span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="bg-secondary d-flex align-items-center justify-content-center" style="height: 240px;">
+                            <span class="text-white fs-4">Няма снимка</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="card-body text-white d-flex flex-column">
+                        <h5 class="card-title fw-bold text-success mb-1">{{ car.brand }} {{ car.model }}</h5>
+                        <p class="h4 text-success fw-bold mb-2">{{ "{:,.0f}".format(car.price) }} лв.</p>
+                        
+                        <div class="small text-muted mb-3">
+                            <div>{{ car.year }} г. • {{ "{:,.0f}".format(car.mileage) }} км</div>
+                            <div>{{ car.horsepower }} к.с. • {{ car.engine_size }} ccm • {{ car.fuel }}</div>
+                        </div>
+
+                        <div class="mt-auto">
+                            <small class="text-muted">{{ car.created_at.strftime("%d.%m.%Y") }}</small>
+                        </div>
+                    </div>
+                </div>
             </a>
         </div>
+        {% endfor %}
     </div>
-</section>
+    {% else %}
+    <div class="text-center py-5">
+        <h3 class="text-muted">Още няма обяви</h3>
+        <a href="/add_car" class="btn btn-success btn-lg mt-3">Бъди първият → Качи обява</a>
+    </div>
+    {% endif %}
+</div>
 
 <style>
-    .hero-fullscreen {
-        position: relative;
-        height: 100vh;
-        min-height: 100vh;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-    }
 
-    .hero-bg {
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        z-index: -2;
+
+    /* ВИДЕОТО ЗАЕМА ЦЕЛИЯ ЕКРАН – БЕЗ ЧЕРНИ ЛЕНТИ, БЕЗ СКРОЛ */
+    .hero-video-section {
+        height: 100vh !important;
+        min-height: 100vh !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* КЛЮЧЪТ: object-fit: cover + 100% w/h */
+    .hero-video {
+        object-fit: cover !important;
+        width: 100% !important;
+        height: 100% !important;
+        top: 0 !important;
+        left: 0 !important;
     }
 
     .hero-overlay {
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.85) 100%);
-        z-index: -1;
+        background: linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 70%);
     }
 
-    .hero-content-wrapper {
-        position: relative;
-        z-index: 10;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        padding-left: 8vw;
-        padding-right: 8vw;
-    }
-
-    .hero-text {
-        max-width: 900px;
-    }
-
-    /* Картички – същите брутални */
-    .car-card {
-        background: white;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        transition: all 0.4s ease;
-        height: 100%;
-    }
-
-    .car-card:hover {
-        transform: translateY(-15px);
-        box-shadow: 0 30px 70px rgba(0,0,0,0.22);
-    }
-
-    .car-img-wrapper {position: relative; overflow: hidden;}
-    .car-img {width: 100%; height: 220px; object-fit: cover; transition: transform 0.6s ease;}
-    .car-card:hover .car-img {transform: scale(1.1);}
-
-    .car-price-badge {
-        position: absolute;
-        bottom: 15px; right: 15px;
-        background: #00bf63;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 50px;
-        font-weight: bold;
-        font-size: 1.25rem;
-        box-shadow: 0 5px 20px rgba(0,191,99,0.5);
-    }
-
-    .car-body {padding: 22px;}
-    .car-title {font-size: 1.35rem; font-weight: 700; color: #1a1a1a; margin-bottom: 8px;}
-    .car-specs {color: #555; font-size: 0.95rem;}
+    .text-shadow { text-shadow: 0 4px 20px rgba(0,0,0,0.9); }
+    .hover-card, .hover-lift { transition: all 0.35s ease; }
+    .hover-card:hover { transform: translateY(-12px); box-shadow: 0 25px 50px rgba(0,255,133,0.3) !important; }
+    .hover-lift:hover { transform: translateY(-6px); }
 </style>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const video = document.getElementById("heroVideo");
+        if (video) video.play().catch(() => {});
+    });
+</script>
 
 {% endblock %}
