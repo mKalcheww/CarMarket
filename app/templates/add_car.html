@@ -104,7 +104,6 @@
     </div>
 </div>
 
-<!-- КРАСИВ ЧЕРЕН СТИЛ -->
 <style>
     body { background-color: #0f0f0f !important; color: #e0e0e0 !important; }
     .card { background: linear-gradient(145deg, #1a1a1a, #121212) !important; border: 1px solid #333 !important; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
@@ -120,59 +119,91 @@
     .preview-img { height: 220px; object-fit: cover; border-radius: 12px; border: 2px solid #00ff85; }
 </style>
 
-<!-- 100% РАБОТЕЩ JS С ПРЕВЮ -->
+
 <script>
     let carId = null;
+    let isUploading = false; // Нов флаг за контрол на последователността
 
-    async function uploadFile(file) {
-        // ПЪРВО СЪЗДАВАМЕ ОБЯВАТА
-        if (!carId) {
-            const formData = new FormData(document.getElementById('carForm'));
-            formData.delete('submit');
-            formData.delete('csrf_token'); 
+    // Асинхронна функция за обработка на всички файлове последователно
+    async function processFiles(files) {
+        if (isUploading) return;
+        isUploading = true;
+        
+        // Превръщаме FileList в масив, за да можем да го обходим с for...of
+        const fileArray = Array.from(files);
 
-            const response = await fetch('/add_car', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            });
+        for (const file of fileArray) {
+            // ПЪРВО: Създай обява, ако няма carId (трябва да се случи само веднъж)
+            if (!carId) {
+                const formData = new FormData(document.getElementById('carForm'));
+                formData.delete('submit');
+                formData.delete('csrf_token'); 
+                
+                // ВАЛИДИРАНЕ ПРИ ПЪРВОТО КАЧВАНЕ:
+                // Проверяваме дали всички задължителни полета са попълнени
+                const requiredFields = ['brand', 'model', 'year', 'price', 'horsepower', 'engine_size', 'fuel', 'mileage', 'transmission', 'color', 'doors', 'condition'];
+                let allFieldsFilled = true;
+                for (const field of requiredFields) {
+                    if (!formData.get(field)) {
+                        allFieldsFilled = false;
+                        break;
+                    }
+                }
 
-            if (!response.ok) {
-                alert('Попълни всички задължителни полета!');
-                return;
+                if (!allFieldsFilled) {
+                    alert('Преди да качиш снимки, моля попълни всички задължителни полета!');
+                    isUploading = false;
+                    return; // Спира целия процес на качване
+                }
+
+                const response = await fetch('/add_car', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    alert('Възникна грешка при създаването на обявата! Провери дали всички полета са валидни.');
+                    isUploading = false;
+                    return; // Спира целия процес на качване
+                }
+
+                const data = await response.json();
+                carId = data.car_id;
             }
 
-            const data = await response.json();
-            carId = data.car_id;
-        }
+            // ВТОРО: Качваме текущата снимка
+            const uploadData = new FormData();
+            uploadData.append('file', file);
 
-        // КАЧВАМЕ СНИМКАТА
-        const uploadData = new FormData();
-        uploadData.append('file', file);
+            const uploadResponse = await fetch(`/upload_image/${carId}`, {
+                method: 'POST',
+                body: uploadData
+            });
 
-        const uploadResponse = await fetch(`/upload_image/${carId}`, {
-            method: 'POST',
-            body: uploadData
-        });
-
-        if (uploadResponse.ok) {
-            const result = await uploadResponse.json();
-            const preview = document.getElementById('preview');
-            const col = document.createElement('div');
-            col.className = 'col-md-4 col-lg-3 mb-3';
-            col.innerHTML = `
-                <div class="rounded-3 overflow-hidden shadow-lg border border-success border-opacity-50">
-                    <img src="${result.url}" class="w-100" style="height:220px; object-fit:cover;">
-                    <div class="bg-dark bg-dark bg-opacity-90 text-center py-2">
-                        <small class="text-white">${file.name}</small>
-                        ${result.is_main ? '<span class="badge bg-success ms-2">Главна</span>' : ''}
+            if (uploadResponse.ok) {
+                const result = await uploadResponse.json();
+                const preview = document.getElementById('preview');
+                const col = document.createElement('div');
+                col.className = 'col-md-4 col-lg-3 mb-3';
+                col.innerHTML = `
+                    <div class="rounded-3 overflow-hidden shadow-lg border border-success border-opacity-50">
+                        <img src="${result.url}" class="w-100" style="height:220px; object-fit:cover;">
+                        <div class="bg-dark bg-dark bg-opacity-90 text-center py-2">
+                            <small class="text-white">${file.name}</small>
+                            ${result.is_main ? '<span class="badge bg-success ms-2">Главна</span>' : ''}
+                        </div>
                     </div>
-                </div>
-            `;
-            preview.appendChild(col);
+                `;
+                preview.appendChild(col);
+            } else {
+                alert(`Грешка при качване на ${file.name}. Може да е невалиден формат или размер.`);
+            }
         }
+        
+        isUploading = false;
     }
 
     // Drag & Drop
@@ -186,7 +217,7 @@
         input.style.display = 'none';
         document.body.appendChild(input);
         input.onchange = e => {
-            [...e.target.files].forEach(uploadFile);
+            processFiles(e.target.files); // Извикваме новата функция
         };
         input.click();
     })();
@@ -194,7 +225,7 @@
     dropZone.ondrop = e => {
         e.preventDefault();
         dropZone.style.backgroundColor = '';
-        [...e.dataTransfer.files].forEach(uploadFile);
+        processFiles(e.dataTransfer.files); // Извикваме новата функция
     };
 
     dropZone.ondragover = dropZone.ondragenter = e => {
@@ -207,14 +238,41 @@
     };
 
     // Публикуване
-    document.getElementById('carForm').onsubmit = e => {
+    document.getElementById('carForm').onsubmit = async e => {
         e.preventDefault();
+        
         if (!carId) {
-            alert('Качи поне една снимка!');
-            return;
+            // Ако няма carId, значи няма качени снимки И не е минало през AJAX създаване. 
+            // Правим голям POST, за да може Flask да хване валидационните грешки.
+            const formElement = document.getElementById('carForm');
+            const submitResponse = await fetch('/add_car', {
+                method: 'POST',
+                body: new FormData(formElement)
+            });
+            
+            // Ако има грешки, Flask ще върне страницата с flash messages.
+            // Ако е успешно, ще ни пренасочи.
+            if (submitResponse.ok) {
+                 // Ако Flask го е приел успешно (попълнени полета, но без снимка), трябва да видим дали да го пуснем
+                 // В нашия случай, ако няма снимка, го прекъсваме и изискваме поне една.
+                 alert('Качи поне една снимка!');
+                 return;
+            } else {
+                // В противен случай, разчитаме на Flask да върне грешките.
+                alert('Попълни всички задължителни полета и качи поне една снимка!');
+                return;
+            }
         }
+        
+        // Ако вече имаме carId, значи обявата е създадена и просто пренасочваме.
         location.href = `/car/${carId}`;
     };
+
+    // За да позволим нормално submit-ване, ако потребителят реши да попълни всичко 
+    // и да натисне бутона "Публикувай обявата" без да качва снимки, а след това
+    // да качва снимки на страницата за детайли (което е друг сценарий). 
+    // Но тъй като в момента логиката е снимки -> създаване на обява, 
+    // запазваме оригиналната идея.
 </script>
 
 {% endblock %}

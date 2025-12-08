@@ -3,14 +3,12 @@
 
 {% block content %}
 
-<!-- HERO СЕКЦИЯ – ВИДЕОТО ЗАЕМА ЦЕЛИЯ ЕКРАН БЕЗ ЧЕРНИ ЛЕНТИ -->
 <section class="hero-video-section position-relative overflow-hidden vh-100">
     <video autoplay muted loop playsinline id="heroVideo"
        class="hero-video position-absolute top-0 start-0 w-100 h-100">
     <source src="{{ url_for('static', filename='video/hero.mp4') }}" type="video/mp4">
 </video>
 
-    <!-- Тъмен оверлей + текст -->
     <div class="hero-overlay position-absolute top-0 start-0 w-100 h-100"></div>
     
     <div class="container position-relative z-3 h-100 d-flex align-items-center justify-content-center text-center">

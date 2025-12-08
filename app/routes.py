@@ -135,6 +135,10 @@ def add_car():
     return render_template('add_car.html', form=form)
 
 
+# app/routes.py
+
+# ... (останалата част от файла)
+
 @bp.route('/upload_image/<int:car_id>', methods=['POST'])
 @login_required
 def upload_image(car_id):
@@ -152,8 +156,10 @@ def upload_image(car_id):
     if not file.filename.lower().endswith(('jpg', 'jpeg', 'png', 'webp', 'gif')):
         return jsonify({'success': False, 'error': 'Невалиден формат'}), 400
 
-    # Първата снимка става главна
-    is_main = CarImage.query.filter_by(car_id=car_id).count() == 0
+    # Проверка дали вече има ГЛАВНА снимка
+    has_main_image = CarImage.query.filter_by(car_id=car_id, is_main=True).first() is not None
+    # Ако няма главна снимка И няма други снимки (т.е. това е ПЪРВАТА снимка)
+    is_main = not has_main_image and CarImage.query.filter_by(car_id=car_id).count() == 0
 
     filename = secure_filename(f"{car_id}_{int(time.time())}_{file.filename}")
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
