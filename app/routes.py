@@ -5,13 +5,18 @@ from .models import User, Car, CarImage, db
 from .forms import RegisterForm, LoginForm, CarForm
 from werkzeug.utils import secure_filename
 import os
+import time
+# НОВ ИМПОРТ за оптимизация на заявките (N+1 fix)
+from sqlalchemy.orm import joinedload
+from werkzeug.security import generate_password_hash, check_password_hash # Явен импорт на security функциите
 
 bp = Blueprint('routes', __name__)
 
-# Начало – всички коли
+# Начало – всички коли (N+1 fix)
 @bp.route('/')
 def index():
-    cars = Car.query.order_by(Car.created_at.desc()).all()
+    # Използваме joinedload за да вземем снимките с една заявка
+    cars = Car.query.options(joinedload(Car.images)).order_by(Car.created_at.desc()).all()
     return render_template('index.html', cars=cars)
 
 # Регистрация
@@ -21,7 +26,6 @@ def register():
         return redirect(url_for('routes.index'))
     form = RegisterForm()
     if form.validate_on_submit():
-        from werkzeug.security import generate_password_hash
         user = User(
             username=form.username.data,
             email=form.email.data,
@@ -41,7 +45,6 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
-        from werkzeug.security import check_password_hash
         if user and check_password_hash(user.password_hash, form.password.data):
             login_user(user)
             flash('Добре дошъл обратно!', 'success')
@@ -57,36 +60,22 @@ def logout():
     flash('Успешно излязохте от профила си', 'info')
     return redirect(url_for('routes.index'))
 
-# Добавяне на кола – всеки регистриран потребител
-import time
-from werkzeug.utils import secure_filename
-
+# Добавяне на кола – всеки регистриран потребител (WTF Validation fix)
 @bp.route('/add_car', methods=['GET', 'POST'])
 @login_required
 def add_car():
     form = CarForm()
-
-    # AJAX заявка – заобикаляме CSRF
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        form = CarForm(request.form)
-        # Пропускаме CSRF проверка за AJAX
-        form.csrf_token.data = None
-        csrf_valid = True
-    else:
-        csrf_valid = form.validate_on_submit()
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
     if request.method == 'POST':
-        # За AJAX – валидираме ръчно
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            if not all([
-                form.brand.data, form.model.data, form.year.data, form.price.data,
-                form.horsepower.data, form.engine_size.data, form.fuel.data,
-                form.mileage.data, form.transmission.data, form.color.data,
-                form.doors.data, form.condition.data
-            ]):
-                return jsonify({'success': False, 'errors': {'form': ['Попълни всички задължителни полета!']}}), 400
-
-            # Създаваме колата
+        if is_ajax:
+            # За AJAX заявки, зареждаме данните, за да може form.validate() да работи коректно.
+            # WTForms автоматично ще пропусне CSRF проверката при AJAX, ако не е подаден токен.
+            form.process(formdata=request.form)
+        
+        # Използваме form.validate() за да изпълним всички валидации (и за AJAX, и за нормален POST)
+        if form.validate():
+            # Създаваме Car обекта
             car = Car(
                 brand=form.brand.data,
                 model=form.model.data,
@@ -105,39 +94,25 @@ def add_car():
             )
             db.session.add(car)
             db.session.commit()
-            return jsonify({'success': True, 'car_id': car.id})
 
-        # Нормално POST
-        if form.validate_on_submit():
-            car = Car(
-                brand=form.brand.data,
-                model=form.model.data,
-                year=form.year.data,
-                price=form.price.data,
-                horsepower=form.horsepower.data,
-                engine_size=form.engine_size.data,
-                fuel=form.fuel.data,
-                mileage=form.mileage.data,
-                transmission=form.transmission.data,
-                color=form.color.data,
-                doors=form.doors.data,
-                condition=form.condition.data,
-                description=form.description.data or '',
-                user_id=current_user.id
-            )
-            db.session.add(car)
-            db.session.commit()
+            if is_ajax:
+                return jsonify({'success': True, 'car_id': car.id})
+
+            # Нормален POST
             flash('Обявата е публикувана успешно!', 'success')
             return redirect(url_for('routes.car_detail', id=car.id))
 
+        # Ако валидацията не е успешна
+        if is_ajax:
+            # Връщаме грешките от WTForms като JSON
+            errors = {'form': [msg for field in form.errors.values() for msg in field]}
+            return jsonify({'success': False, 'errors': errors}), 400
+        
+        # Ако не е AJAX и има грешки
         flash('Попълни всички задължителни полета!', 'danger')
 
     return render_template('add_car.html', form=form)
 
-
-# app/routes.py
-
-# ... (останалата част от файла)
 
 @bp.route('/upload_image/<int:car_id>', methods=['POST'])
 @login_required
@@ -156,10 +131,8 @@ def upload_image(car_id):
     if not file.filename.lower().endswith(('jpg', 'jpeg', 'png', 'webp', 'gif')):
         return jsonify({'success': False, 'error': 'Невалиден формат'}), 400
 
-    # Проверка дали вече има ГЛАВНА снимка
-    has_main_image = CarImage.query.filter_by(car_id=car_id, is_main=True).first() is not None
-    # Ако няма главна снимка И няма други снимки (т.е. това е ПЪРВАТА снимка)
-    is_main = not has_main_image and CarImage.query.filter_by(car_id=car_id).count() == 0
+    # Първата снимка става главна
+    is_main = CarImage.query.filter_by(car_id=car_id).count() == 0
 
     filename = secure_filename(f"{car_id}_{int(time.time())}_{file.filename}")
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
@@ -174,11 +147,13 @@ def upload_image(car_id):
         'url': url_for('static', filename=f'uploads/cars/{filename}'),
         'is_main': is_main
     })
+
 # Моите обяви
 @bp.route('/my_cars')
 @login_required
 def my_cars():
-    cars = Car.query.filter_by(user_id=current_user.id).order_by(Car.created_at.desc()).all()
+    # Използваме joinedload за да вземем снимките с една заявка
+    cars = Car.query.filter_by(user_id=current_user.id).options(joinedload(Car.images)).order_by(Car.created_at.desc()).all()
     return render_template('my_cars.html', cars=cars)
 
 # Детайлен изглед на кола
@@ -197,7 +172,8 @@ def car_detail(id):
 def delete_car(id):
     car = Car.query.get_or_404(id)
     
-    if car.user_id != current_user.id and not current_user.is_admin:
+    # ПРОВЕРКА ЗА is_admin (След като добавиш полето и направиш миграцията)
+    if car.user_id != current_user.id and not getattr(current_user, 'is_admin', False):
         flash('Нямате право да изтриете тази обява!', 'danger')
         return redirect(url_for('routes.index'))
 
@@ -215,6 +191,8 @@ def delete_car(id):
 @bp.route('/search')
 def search():
     query = Car.query
+    # Използваме joinedload за да вземем снимките с една заявка
+    query = query.options(joinedload(Car.images))
 
     # Филтри
     if request.args.get('brand'):
