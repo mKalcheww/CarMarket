@@ -1,14 +1,14 @@
-# app/__init__.py
+# app/__init__.py (Окончателна, работеща версия)
 
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate          
+from flask_migrate import Migrate
 from flask_login import LoginManager
 from config import Config
 
 db = SQLAlchemy()
-migrate = Migrate()          
+migrate = Migrate()
 login_manager = LoginManager()
 login_manager.login_view = 'routes.login'
 login_manager.login_message_category = "info"
@@ -36,17 +36,17 @@ def create_app():
 
     # Създаване на таблици + админ
     with app.app_context():
-        db.create_all()
+        db.create_all() # Този път ще създаде таблицата с is_admin
         if not User.query.first():
             from werkzeug.security import generate_password_hash
             admin = User(
                 username='admin',
                 email='admin@carmarket.bg',
                 password_hash=generate_password_hash('admin123'),
-                is_admin=True # Маркиране на потребителя като админ
+                is_admin=True # Коректно маркиране на админа
             )
-            db.session.add(admin) 
+            db.session.add(admin)
             db.session.commit()
-            print("СЪЗДАДЕН Е АДМИН: admin / admin123") 
+            print("СЪЗДАДЕН Е АДМИН: admin / admin123")
 
     return app

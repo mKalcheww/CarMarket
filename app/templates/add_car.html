@@ -16,7 +16,6 @@
 
                         <div class="row g-4">
 
-                            <!-- ПОЛЕТАТА -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Марка <span class="text-danger">*</span></label>
                                 {{ form.brand(class="form-control form-control-lg shadow-sm", placeholder="BMW, Audi, Mercedes...") }}
@@ -79,7 +78,6 @@
                                 {{ form.description(class="form-control shadow-sm", rows="6", placeholder="Перфектно състояние, един собственик, пълна сервизна история...") }}
                             </div>
 
-                            <!-- КАЧВАНЕ НА СНИМКИ -->
                             <div class="col-12 mt-5">
                                 <label class="form-label fw-bold text-success fs-4">Снимки (задължително поне една)</label>
                                 
@@ -89,7 +87,6 @@
                                     <small class="text-muted">Макс. 10 снимки • JPG, PNG, WebP • до 5MB</small>
                                 </div>
 
-                                <!-- ПРЕВЮ НА КАЧЕНИТЕ СНИМКИ -->
                                 <div id="preview" class="row mt-4 g-3"></div>
                             </div>
 
@@ -119,10 +116,9 @@
     .preview-img { height: 220px; object-fit: cover; border-radius: 12px; border: 2px solid #00ff85; }
 </style>
 
-
 <script>
     let carId = null;
-    let isUploading = false; // Нов флаг за контрол на последователността
+    let isUploading = false; // Флаг за контрол на последователността
 
     // Асинхронна функция за обработка на всички файлове последователно
     async function processFiles(files) {
@@ -133,18 +129,24 @@
         const fileArray = Array.from(files);
 
         for (const file of fileArray) {
+            
+            // ПЪРВО: Създай обява, ако няма carId (трябва да се случи само веднъж)
             // ПЪРВО: Създай обява, ако няма carId (трябва да се случи само веднъж)
             if (!carId) {
+                // Извличаме CSRF токена от скритото поле
+                const csrfToken = document.querySelector('input[name="csrf_token"]').value; 
+
                 const formData = new FormData(document.getElementById('carForm'));
                 formData.delete('submit');
-                formData.delete('csrf_token'); 
+                // ТРЯБВА ДА ГО ДОБАВИМ ИЗРИЧНО КЪМ FormData ЗА AJAX ВАЛИДАЦИЯ
+                formData.append('csrf_token', csrfToken);
                 
-                // ВАЛИДИРАНЕ ПРИ ПЪРВОТО КАЧВАНЕ:
-                // Проверяваме дали всички задължителни полета са попълнени
+                // ВАЛИДАЦИЯ В JS (за бърза обратна връзка)
                 const requiredFields = ['brand', 'model', 'year', 'price', 'horsepower', 'engine_size', 'fuel', 'mileage', 'transmission', 'color', 'doors', 'condition'];
                 let allFieldsFilled = true;
                 for (const field of requiredFields) {
-                    if (!formData.get(field)) {
+                    // Проверяваме и csrf_token, за да не го отчитаме като грешно поле
+                    if (!formData.get(field) && field !== 'csrf_token') { 
                         allFieldsFilled = false;
                         break;
                     }
@@ -163,13 +165,24 @@
                     },
                     body: formData
                 });
-
+                
+                // ... (БЛОКЪТ ЗА ОБРАБОТКА НА ГРЕШКИ ОСТАВА СЪЩИЯ)
                 if (!response.ok) {
-                    alert('Възникна грешка при създаването на обявата! Провери дали всички полета са валидни.');
+                    const errorData = await response.json();
+                    let errorMessage = 'Възникна грешка при създаването на обявата! Проверете дали всички полета са валидни.';
+                    
+                    if (errorData.errors && errorData.errors.form && errorData.errors.form.length > 0) {
+                        errorMessage += '\n\nКонкретни грешки:\n' + errorData.errors.form.join('\n');
+                    } else if (response.status >= 500) {
+                         errorMessage = 'Вътрешна грешка на сървъра (Internal Server Error). Проверете конзолата за подробности.';
+                    }
+                    
+                    alert(errorMessage);
                     isUploading = false;
                     return; // Спира целия процес на качване
                 }
-
+                // ... (край на блока за грешки)
+                
                 const data = await response.json();
                 carId = data.car_id;
             }
@@ -217,7 +230,7 @@
         input.style.display = 'none';
         document.body.appendChild(input);
         input.onchange = e => {
-            processFiles(e.target.files); // Извикваме новата функция
+            processFiles(e.target.files); // Извикваме новата, последователна функция
         };
         input.click();
     })();
@@ -225,7 +238,7 @@
     dropZone.ondrop = e => {
         e.preventDefault();
         dropZone.style.backgroundColor = '';
-        processFiles(e.dataTransfer.files); // Извикваме новата функция
+        processFiles(e.dataTransfer.files); // Извикваме новата, последователна функция
     };
 
     dropZone.ondragover = dropZone.ondragenter = e => {
@@ -237,42 +250,16 @@
         dropZone.style.backgroundColor = '';
     };
 
-    // Публикуване
-    document.getElementById('carForm').onsubmit = async e => {
+    // Публикуване (финална стъпка)
+    document.getElementById('carForm').onsubmit = e => {
         e.preventDefault();
-        
         if (!carId) {
-            // Ако няма carId, значи няма качени снимки И не е минало през AJAX създаване. 
-            // Правим голям POST, за да може Flask да хване валидационните грешки.
-            const formElement = document.getElementById('carForm');
-            const submitResponse = await fetch('/add_car', {
-                method: 'POST',
-                body: new FormData(formElement)
-            });
-            
-            // Ако има грешки, Flask ще върне страницата с flash messages.
-            // Ако е успешно, ще ни пренасочи.
-            if (submitResponse.ok) {
-                 // Ако Flask го е приел успешно (попълнени полета, но без снимка), трябва да видим дали да го пуснем
-                 // В нашия случай, ако няма снимка, го прекъсваме и изискваме поне една.
-                 alert('Качи поне една снимка!');
-                 return;
-            } else {
-                // В противен случай, разчитаме на Flask да върне грешките.
-                alert('Попълни всички задължителни полета и качи поне една снимка!');
-                return;
-            }
+            alert('Качи поне една снимка, за да финализираш обявата!');
+            return;
         }
-        
-        // Ако вече имаме carId, значи обявата е създадена и просто пренасочваме.
+        // Пренасочваме към детайлния изглед на току-що създадената обява
         location.href = `/car/${carId}`;
     };
-
-    // За да позволим нормално submit-ване, ако потребителят реши да попълни всичко 
-    // и да натисне бутона "Публикувай обявата" без да качва снимки, а след това
-    // да качва снимки на страницата за детайли (което е друг сценарий). 
-    // Но тъй като в момента логиката е снимки -> създаване на обява, 
-    // запазваме оригиналната идея.
 </script>
 
 {% endblock %}
