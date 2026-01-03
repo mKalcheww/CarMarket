@@ -35,15 +35,18 @@ def create_app():
         return User.query.get(int(id))
 
     # Създаване на таблици + админ
+    # Създаване на таблици + админ
     with app.app_context():
-        db.create_all() # Този път ще създаде таблицата с is_admin
-        if not User.query.first():
+        db.create_all() 
+        # Проверяваме дали админът вече съществува
+        if not User.query.filter_by(username='admin').first():
             from werkzeug.security import generate_password_hash
             admin = User(
                 username='admin',
                 email='admin@carmarket.bg',
+                phone_number='0888888888', # ДОБАВЕНО: Задължително поле за телефон
                 password_hash=generate_password_hash('admin123'),
-                is_admin=True # Коректно маркиране на админа
+                is_admin=True 
             )
             db.session.add(admin)
             db.session.commit()

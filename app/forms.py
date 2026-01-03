@@ -4,11 +4,12 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
 from flask_wtf.file import FileAllowed
 
 class RegisterForm(FlaskForm):
-    username = StringField('Потребителско име', validators=[DataRequired(), Length(min=3, max=20)])
+    username = StringField('Потребителско име', validators=[DataRequired(), Length(min=4, max=20)])
     email = StringField('Имейл', validators=[DataRequired(), Email()])
+    phone_number = StringField('Телефонен номер', validators=[DataRequired(), Length(min=7, max=15)]) # Добавено
     password = PasswordField('Парола', validators=[DataRequired(), Length(min=6)])
-    confirm = PasswordField('Повтори парола', validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Регистрация')
+    confirm_password = PasswordField('Потвърди парола', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Регистрирай се')
 
 class LoginForm(FlaskForm):
     username = StringField('Потребител', validators=[DataRequired()])

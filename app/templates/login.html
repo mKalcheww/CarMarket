@@ -2,32 +2,56 @@
 {% block title %}Вход{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-body p-5">
-                <h2 class="text-center mb-4 text-warning">Вход в системата</h2>
-                <form method="POST">
-                    {{ form.hidden_tag() }}
-                    <div class="mb-3">
-                        {{ form.username.label(class="form-label") }}
-                        {{ form.username(class="form-control form-control-lg") }}
-                    </div>
-                    <div class="mb-4">
-                        {{ form.password.label(class="form-label") }}
-                        {{ form.password(class="form-control form-control-lg") }}
-                    </div>
-                    <div class="d-grid">
-                        {{ form.submit(class="btn btn-warning btn-lg") }}
-                    </div>
-                </form>
-                <div class="text-center mt-4">
-                    <small class="text-muted">
-                        Нямаш профил? <a href="/register" class="text-warning">Регистрирай се</a>
-                    </small>
-                </div>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card bg-dark border-secondary border-opacity-25 rounded-4 shadow-lg p-4" style="width: 100%; max-width: 400px; backdrop-filter: blur(10px);">
+        <h2 class="text-center fw-bold text-success mb-4">Вход в системата</h2>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="mb-3 text-start">
+                <label class="form-label text-success fw-bold small ms-1">{{ form.username.label }}</label>
+                {{ form.username(class="form-control custom-input shadow-none", placeholder="Потребителско име") }}
             </div>
-        </div>
+            <div class="mb-4 text-start">
+                <label class="form-label text-success fw-bold small ms-1">{{ form.password.label }}</label>
+                {{ form.password(class="form-control custom-input shadow-none", placeholder="******") }}
+            </div>
+            <div class="d-grid">
+                {{ form.submit(class="btn btn-success rounded-pill fw-bold py-2 shadow") }}
+            </div>
+            <p class="text-center mt-3 text-white-50 small">
+                Нямаш акаунт? <a href="{{ url_for('routes.register') }}" class="text-success text-decoration-none fw-bold border-bottom border-success border-opacity-25">Регистрирай се</a>
+            </p>
+        </form>
     </div>
 </div>
+
+<style>
+    /* ПЪЛЕН КОНТРОЛ ВЪРХУ ИНПУТИТЕ */
+    .custom-input {
+        background-color: #0d1117 !important;
+        border: 1px solid #30363d !important;
+        color: #ffffff !important;
+        padding: 0.75rem 1rem;
+    }
+
+    .custom-input::placeholder {
+        color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    .custom-input:focus {
+        border-color: #00ff85 !important;
+        background-color: #0d1117 !important;
+        box-shadow: 0 0 0 0.25rem rgba(0, 255, 133, 0.1) !important;
+        color: white !important;
+    }
+
+    /* ФИКС ЗА ЖЪЛТОТО/БЯЛОТО АВТОМАТИЧНО ПОПЪЛВАНЕ */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus {
+        -webkit-text-fill-color: #ffffff !important;
+        -webkit-box-shadow: 0 0 0px 1000px #0d1117 inset !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+</style>
 {% endblock %}

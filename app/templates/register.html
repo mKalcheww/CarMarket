@@ -2,35 +2,67 @@
 {% block title %}Регистрация{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body p-5">
-                <h2 class="text-center mb-4 text-success">Създай профил</h2>
-                <form method="POST">
-                    {{ form.hidden_tag() }}
-                    <div class="mb-3">
-                        {{ form.username.label(class="form-label") }}
-                        {{ form.username(class="form-control") }}
-                    </div>
-                    <div class="mb-3">
-                        {{ form.email.label(class="form-label") }}
-                        {{ form.email(class="form-control") }}
-                    </div>
-                    <div class="mb-3">
-                        {{ form.password.label(class="form-label") }}
-                        {{ form.password(class="form-control") }}
-                    </div>
-                    <div class="mb-4">
-                        {{ form.confirm.label(class="form-label") }}
-                        {{ form.confirm(class="form-control") }}
-                    </div>
-                    <div class="d-grid">
-                        {{ form.submit(class="btn btn-success btn-lg") }}
-                    </div>
-                </form>
+<div class="container d-flex justify-content-center align-items-center py-5" style="min-height: 85vh;">
+    <div class="card bg-dark border-secondary border-opacity-25 rounded-4 shadow-lg p-4" style="width: 100%; max-width: 500px; backdrop-filter: blur(10px);">
+        <h2 class="text-center fw-bold text-success mb-4">Създай акаунт</h2>
+        
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <div class="mb-3 text-start">
+                <label class="form-label text-success fw-bold small ms-1">{{ form.username.label }}</label>
+                {{ form.username(class="form-control custom-input shadow-none", placeholder="Потребителско име") }}
             </div>
-        </div>
+
+            <div class="mb-3 text-start">
+                <label class="form-label text-success fw-bold small ms-1">{{ form.email.label }}</label>
+                {{ form.email(class="form-control custom-input shadow-none", placeholder="name@example.com") }}
+            </div>
+
+            <div class="mb-3 text-start">
+                <label class="form-label text-success fw-bold small ms-1">{{ form.phone_number.label }}</label>
+                {{ form.phone_number(class="form-control custom-input shadow-none", placeholder="0888 888 888") }}
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3 text-start">
+                    <label class="form-label text-success fw-bold small ms-1">{{ form.password.label }}</label>
+                    {{ form.password(class="form-control custom-input shadow-none", placeholder="******") }}
+                </div>
+                <div class="col-md-6 mb-4 text-start">
+                    <label class="form-label text-success fw-bold small ms-1">{{ form.confirm_password.label }}</label>
+                    {{ form.confirm_password(class="form-control custom-input shadow-none", placeholder="******") }}
+                </div>
+            </div>
+
+            <div class="d-grid">
+                {{ form.submit(class="btn btn-success rounded-pill fw-bold py-2 shadow-lg") }}
+            </div>
+            
+            <p class="text-center mt-3 text-white-50 small">
+                Вече имаш акаунт? <a href="{{ url_for('routes.login') }}" class="text-success text-decoration-none fw-bold border-bottom border-success border-opacity-25">Влез тук</a>
+            </p>
+        </form>
     </div>
 </div>
+
+<style>
+    /* Копираме същия стил за консистентност */
+    .custom-input {
+        background-color: #0d1117 !important;
+        border: 1px solid #30363d !important;
+        color: #ffffff !important;
+        padding: 0.75rem 1rem;
+    }
+    .custom-input:focus {
+        border-color: #00ff85 !important;
+        background-color: #0d1117 !important;
+        box-shadow: 0 0 0 0.25rem rgba(0, 255, 133, 0.1) !important;
+        color: white !important;
+    }
+    input:-webkit-autofill {
+        -webkit-text-fill-color: #ffffff !important;
+        -webkit-box-shadow: 0 0 0px 1000px #0d1117 inset !important;
+    }
+</style>
 {% endblock %}
