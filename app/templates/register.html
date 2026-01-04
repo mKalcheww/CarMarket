@@ -47,22 +47,32 @@
 </div>
 
 <style>
-    /* Копираме същия стил за консистентност */
+    /* Директно копираме същия стил от login.html за перфектно съвпадение */
     .custom-input {
         background-color: #0d1117 !important;
         border: 1px solid #30363d !important;
         color: #ffffff !important;
         padding: 0.75rem 1rem;
     }
+
+    .custom-input::placeholder {
+        color: rgba(255, 255, 255, 0.3) !important;
+    }
+
     .custom-input:focus {
         border-color: #00ff85 !important;
         background-color: #0d1117 !important;
         box-shadow: 0 0 0 0.25rem rgba(0, 255, 133, 0.1) !important;
         color: white !important;
     }
-    input:-webkit-autofill {
+
+    /* Фикс за автоматично попълване */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus {
         -webkit-text-fill-color: #ffffff !important;
         -webkit-box-shadow: 0 0 0px 1000px #0d1117 inset !important;
+        transition: background-color 5000s ease-in-out 0s;
     }
 </style>
 {% endblock %}

@@ -14,7 +14,6 @@
     <div class="container position-relative z-3 h-100 d-flex align-items-center justify-content-center text-center">
         <div class="text-white px-4">
             <h1 class="display-1 fw-bold mb-3 text-shadow"><span class="text-success">CAR</span>MARKET</h1>
-            <p class="lead fs-2 mb-5 text-shadow opacity-95">Най-добрите обяви в България</p>
             <div class="d-flex gap-4 justify-content-center flex-wrap">
                 <a href="{{ url_for('routes.search') }}" class="btn btn-success btn-lg px-5 py-3 fs-4 fw-bold shadow-lg hover-lift">
                     Виж всички обяви
@@ -29,8 +28,8 @@
 
 <div class="container py-5 my-5">
     <div class="text-center mb-5">
-        <h2 class="display-5 fw-bold text-success">Последни обяви</h2>
-        <p class="text-muted fs-5">Най-новите предложения, подбрани за вас</p>
+        <h2 class="display-5 fw-bold text-success mb-2">Последни обяви</h2>
+        <p class="text-white-50 fs-5">Най-новите предложения, подбрани за вас</p>
     </div>
 
     {% if cars %}
@@ -52,7 +51,7 @@
                         {% endif %}
                         
                         <div class="position-absolute top-0 end-0 m-2">
-                            <span class="badge {% if car.condition == 'Нова' %}bg-success{% else %}bg-secondary{% endif %} shadow">
+                            <span class="badge {% if car.condition == 'Нова' %}bg-success text-dark{% else %}bg-secondary{% endif %} shadow fw-bold">
                                 {{ car.condition }}
                             </span>
                         </div>
@@ -69,11 +68,11 @@
                         <div class="text-secondary small mb-4 mt-2">
                             <div class="d-flex align-items-center mb-1">
                                 <i class="bi bi-calendar3 me-2 text-success"></i>
-                                <span>{{ car.year }} г. • {{ "{:,.0f}".format(car.mileage) | replace(",", " ") }} км</span>
+                                <span class="text-white-50">{{ car.year }} г. • {{ "{:,.0f}".format(car.mileage) | replace(",", " ") }} км</span>
                             </div>
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-fuel-pump me-2 text-success"></i>
-                                <span>{{ car.horsepower }} к.с. • {{ car.fuel }}</span>
+                                <span class="text-white-50">{{ car.horsepower }} к.с. • {{ car.fuel }}</span>
                             </div>
                         </div>
 
@@ -90,10 +89,17 @@
         {% endfor %}
     </div>
     {% else %}
-    <div class="text-center py-5 rounded-4 border border-secondary border-dashed">
-        <i class="bi bi-car-front fs-1 text-muted mb-3 d-block"></i>
-        <h3 class="text-muted">Няма активни обяви в момента</h3>
-        <a href="{{ url_for('routes.add_car') }}" class="btn btn-success btn-lg mt-3 px-5">Добави първата обява</a>
+    <div class="col-12">
+        <div class="text-center py-5 px-4 rounded-4 border border-secondary border-opacity-25 bg-dark bg-opacity-50 shadow-sm">
+            <div class="mb-4">
+                <i class="bi bi-car-front text-success opacity-25" style="font-size: 4.5rem;"></i>
+            </div>
+            <h3 class="text-white fw-bold">В момента няма активни обяви</h3>
+            <p class="text-white-50 mb-4 fs-5">Бъдете първият, който ще предложи автомобил в нашата платформа!</p>
+            <a href="{{ url_for('routes.add_car') }}" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i>Добави първата обява
+            </a>
+        </div>
     </div>
     {% endif %}
 </div>
@@ -106,10 +112,10 @@
         z-index: 2;
     }
 
-    /* ФИКС ЗА КАРТИТЕ: Премахване на нежелани цветове и сенки */
     .hover-card {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        background-color: #1a1a1a !important; /* Конкретен тъмен цвят */
+        background-color: #1a1a1a !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
     }
     
     .hover-card:hover {
@@ -121,7 +127,6 @@
     .text-shadow { text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
     .hover-lift:hover { transform: translateY(-3px); }
     
-    /* Осигурява еднакъв размер на всички заглавия */
     .card-title {
         height: 1.5em;
         overflow: hidden;
