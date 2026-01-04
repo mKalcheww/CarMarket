@@ -22,10 +22,21 @@ def index():
 # Регистрация
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('routes.index'))
     form = RegisterForm()
     if form.validate_on_submit():
+        # ПРОВЕРКА: Съществува ли вече такъв потребител?
+        existing_user = User.query.filter_by(username=form.username.data).first()
+        existing_email = User.query.filter_by(email=form.email.data).first()
+        
+        if existing_user:
+            flash('Потребителското име вече е заето. Изберете друго.', 'danger')
+            return render_template('register.html', form=form)
+            
+        if existing_email:
+            flash('Този имейл вече е регистриран.', 'danger')
+            return render_template('register.html', form=form)
+
+        # Ако всичко е наред, създаваме потребителя
         user = User(
             username=form.username.data,
             email=form.email.data,
@@ -33,9 +44,14 @@ def register():
             password_hash=generate_password_hash(form.password.data)
         )
         db.session.add(user)
-        db.session.commit()
-        flash('Регистрацията е успешна! Влез в профила си.', 'success')
-        return redirect(url_for('routes.login'))
+        try:
+            db.session.commit()
+            flash('Регистрацията е успешна! Вече можете да влезете.', 'success')
+            return redirect(url_for('routes.login'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Възникна грешка при запис в базата данни.', 'danger')
+            
     return render_template('register.html', form=form)
 
 # Вход

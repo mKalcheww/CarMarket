@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %} - CarMarket</title>
@@ -13,86 +14,119 @@
     <style>
         :root {
             --car-green: #00ff85;
-            --dark-bg: #121212; /* Наситено черно за фон */
-            --card-bg: #1a1a1a;  /* Малко по-светло черно за карти */
-            --nav-bg: rgba(18, 18, 18, 0.9);
+            --dark-bg: #0a0a0a; 
+            --card-bg: #121212;
+            --nav-bg: rgba(10, 10, 10, 0.85);
         }
 
         body {
             background-color: var(--dark-bg);
-            color: #eeeeee;
+            color: #ffffff;
             font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
             margin: 0;
-            padding: 0;
-            overflow-x: hidden; /* Предотвратява хоризонтален скрол */
         }
 
-        /* Навигация с Blur ефект */
+        main { flex: 1; }
+
+        /* Navbar Style */
         .navbar {
             background: var(--nav-bg) !important;
             backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 0.8rem 0;
-            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem 0;
+            z-index: 1050; /* Под Flash съобщенията, но над Hero */
         }
 
-        .navbar-brand {
-            font-weight: 800;
-            letter-spacing: -1px;
+        .navbar-brand { font-weight: 800; letter-spacing: -1px; }
+
+        /* Flash Messages Overlay */
+        .flash-container {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 9999;
+            width: 100%;
+            max-width: 400px;
+            pointer-events: none;
         }
 
-        .nav-link {
-            font-weight: 600;
-            color: rgba(255,255,255,0.8) !important;
-            transition: all 0.2s;
-            padding: 0.5rem 1rem !important;
-        }
-
-        .nav-link:hover {
-            color: var(--car-green) !important;
-        }
-
-        /* Премахваме черните ленти и излишните разстояния под навигацията */
-        main {
-            min-height: 80vh;
-        }
-
-        /* Глобални бутони */
-        .btn-success {
-            background-color: var(--car-green);
-            border: none;
-            color: #000;
-            font-weight: 700;
-            transition: transform 0.2s, background-color 0.2s;
-        }
-
-        .btn-success:hover {
-            background-color: #00e677;
-            color: #000;
-            transform: translateY(-2px);
-        }
-
-        /* Фикс за Flash съобщенията */
-        .alert {
+        .custom-alert {
+            pointer-events: auto;
+            background-color: rgba(18, 18, 18, 0.9) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
             border-radius: 12px;
-            border: none;
-            background-color: var(--card-bg);
-            color: #fff;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: slideInRight 0.5s ease-out forwards;
         }
 
-        /* Футър */
-        footer {
-            background-color: #0a0a0a;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding: 3rem 0;
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Footer Style */
+        .main-footer {
+            background: linear-gradient(to top, #000000, #0a0a0a);
+            border-top: 1px solid rgba(0, 255, 133, 0.1);
+            padding: 4rem 0 2rem 0;
             margin-top: 5rem;
         }
 
-        /* Помощни класове */
-        .text-success { color: var(--car-green) !important; }
-        .bg-success { background-color: var(--car-green) !important; color: #000 !important; }
+        .footer-logo { font-size: 1.5rem; font-weight: 800; }
+        
+        .footer-link {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .footer-link:hover {
+            color: var(--car-green);
+            padding-left: 5px;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            margin-right: 10px;
+            transition: all 0.3s;
+        }
+
+        .social-icon:hover {
+            background: var(--car-green);
+            color: black;
+            transform: translateY(-5px);
+        }
+
+        /* Глобални фиксове за формите */
+        .custom-input {
+            background-color: #0d1117 !important;
+            border: 1px solid #30363d !important;
+            color: #ffffff !important;
+        }
+        
+        .custom-input:focus {
+            border-color: var(--car-green) !important;
+            box-shadow: 0 0 0 0.25rem rgba(0, 255, 133, 0.1) !important;
+        }
+
+        input:-webkit-autofill {
+            -webkit-text-fill-color: white !important;
+            -webkit-box-shadow: 0 0 0px 1000px #0d1117 inset !important;
+        }
     </style>
 </head>
 <body>
@@ -107,30 +141,29 @@
             </button>
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('routes.index') }}">Начало</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('routes.search') }}">Търсене</a></li>
-                    
+                    <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('routes.index') }}">Начало</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('routes.search') }}">Търсене</a></li>
                     {% if current_user.is_authenticated %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('routes.my_cars') }}">Моите обяви</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('routes.my_cars') }}">Моите обяви</a></li>
                         <li class="nav-item ms-lg-3">
-                            <a class="btn btn-success px-4 rounded-pill shadow-sm" href="{{ url_for('routes.add_car') }}">
+                            <a class="btn btn-success px-4 rounded-pill fw-bold text-dark" href="{{ url_for('routes.add_car') }}">
                                 <i class="bi bi-plus-circle me-2"></i>Добави обява
                             </a>
                         </li>
                         <li class="nav-item dropdown ms-lg-3">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle fs-4 me-2"></i> {{ current_user.username }}
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle fs-5"></i>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg border-secondary">
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg">
+                                <li><span class="dropdown-item-text text-success small fw-bold">{{ current_user.username }}</span></li>
+                                <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{{ url_for('routes.logout') }}">Изход</a></li>
                             </ul>
                         </li>
                     {% else %}
-                        <li class="nav-item ms-lg-3">
-                            <a class="nav-link" href="{{ url_for('routes.login') }}">Вход</a>
-                        </li>
+                        <li class="nav-item ms-lg-3"><a class="nav-link" href="{{ url_for('routes.login') }}">Вход</a></li>
                         <li class="nav-item ms-lg-2">
-                            <a class="btn btn-outline-light px-4 rounded-pill" href="{{ url_for('routes.register') }}">Регистрация</a>
+                            <a class="btn btn-outline-light px-4 rounded-pill fw-bold" href="{{ url_for('routes.register') }}">Регистрация</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -138,30 +171,97 @@
         </div>
     </nav>
 
-    <main>
-        <div class="container mt-4">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show custom-alert shadow-lg" role="alert">
+                        <div class="d-flex align-items-center">
+                            {% if category == 'success' %}
+                                <i class="bi bi-check-circle-fill me-2 text-success"></i>
+                            {% elif category == 'danger' %}
+                                <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle-fill me-2 text-info"></i>
+                            {% endif %}
+                            <div>{{ message }}</div>
                         </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
 
+    <main>
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="text-center text-muted">
+    <footer class="main-footer">
         <div class="container">
-            <h4 class="text-white fw-bold mb-3 small">CARMARKET</h4>
-            <p class="mb-0 small">&copy; 2026 All rights reserved.</p>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-logo text-white mb-3">
+                        <span class="text-success">CAR</span>MARKET
+                    </div>
+                    <p class="text-white-50 small mb-4" style="max-width: 300px;">
+                        Най-модерната платформа за покупко-продажба на автомобили в България. Сигурност, бързина и качество.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h6 class="text-white fw-bold mb-3">Навигация</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{{ url_for('routes.index') }}" class="footer-link">Начало</a></li>
+                        <li class="mb-2"><a href="{{ url_for('routes.search') }}" class="footer-link">Всички обяви</a></li>
+                        <li class="mb-2"><a href="{{ url_for('routes.add_car') }}" class="footer-link">Продай кола</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h6 class="text-white fw-bold mb-3">Помощ</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="footer-link">Условия за ползване</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link">Политика за поверителност</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link">Контакти</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <h6 class="text-white fw-bold mb-3">Свържете се с нас</h6>
+                    <p class="text-white-50 small mb-2"><i class="bi bi-geo-alt text-success me-2"></i> София, България</p>
+                    <p class="text-white-50 small mb-2"><i class="bi bi-envelope text-success me-2"></i> support@carmarket.bg</p>
+                    <p class="text-white-50 small"><i class="bi bi-telephone text-success me-2"></i> 0800 123 456</p>
+                </div>
+            </div>
+
+            <hr class="my-4 border-secondary border-opacity-25">
+
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="text-white-50 small mb-0">&copy; 2026 CarMarket. Всички права запазени.</p>
+                </div>
+            </div>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Автоматично затваряне на известията след 5 секунди
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.custom-alert');
+                alerts.forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
 </body>
 </html>
