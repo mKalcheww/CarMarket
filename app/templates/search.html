@@ -1,75 +1,124 @@
 {% extends "base.html" %}
-{% block title %}Търсене – CarMarket{% endblock %}
+{% block title %}Търсене на автомобили – CarMarket{% endblock %}
 
 {% block content %}
 <div class="container py-5 min-vh-100">
     <div class="row justify-content-center">
         <div class="col-lg-12">
             
-            <h1 class="display-5 fw-bold text-center mb-5 text-success">Търсене на автомобили</h1>
+            <h1 class="display-5 fw-bold text-center mb-5 text-success">Разширено търсене</h1>
 
-            <div class="card shadow-lg border-0 rounded-4 mb-5">
+            <div class="card shadow-lg border-0 rounded-4 mb-5 p-2">
                 <div class="card-body p-4">
-                    <form method="GET" action="{{ url_for('main.search') }}" id="searchForm">
-                        <div class="row g-3">
+                    <form method="GET" action="{{ url_for('routes.search') }}" id="searchForm">
+                        
+                        <div class="row g-3 mb-4">
                             <div class="col-md-3">
-                                <label class="form-label fw-bold">Марка</label>
-                                {{ form.brand(class="form-select form-select-lg shadow-sm", id="brand-search") }}
+                                <label class="form-label fw-bold small text-success">МАРКА</label>
+                                {{ form.brand(class="form-select form-select-lg", id="brand-search") }}
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label fw-bold">Модел</label>
-                                {{ form.model(class="form-select form-select-lg shadow-sm", id="model-search") }}
+                                <label class="form-label fw-bold small text-success">МОДЕЛ</label>
+                                {{ form.model(class="form-select form-select-lg", id="model-search") }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small text-success">МИН. ЦЕНА (€)</label>
+                                {{ form.min_price(class="form-control form-control-lg", placeholder="0") }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small text-success">МАКС. ЦЕНА (€)</label>
+                                {{ form.max_price(class="form-control form-control-lg", placeholder="Без лимит") }}
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold small text-success text-uppercase">От година</label>
+                                {{ form.min_year(class="form-select") }}
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">Мин. цена (€)</label>
-                                {{ form.min_price(class="form-control form-control-lg shadow-sm", placeholder="0") }}
+                                <label class="form-label fw-bold small text-success text-uppercase">До година</label>
+                                {{ form.max_year(class="form-select") }}
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label fw-bold">Макс. цена (€)</label>
-                                {{ form.max_price(class="form-control form-control-lg shadow-sm", placeholder="Без лимит") }}
+                                <label class="form-label fw-bold small text-success text-uppercase">Гориво</label>
+                                {{ form.fuel_type(class="form-select") }}
                             </div>
-                            <div class="col-md-2 d-flex align-items-end">
-                                <button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow-sm">
-                                    <i class="bi bi-search me-2"></i>Търси
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold small text-success text-uppercase">Трансмисия</label>
+                                {{ form.transmission(class="form-select") }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold small text-success text-uppercase">Мин. к.с.</label>
+                                {{ form.min_hp(class="form-control", placeholder="напр. 150") }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold small text-success text-uppercase">Макс. к.с.</label>
+                                {{ form.max_hp(class="form-control", placeholder="напр. 500") }}
+                            </div>
+                        </div>
+
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small text-success text-uppercase">Брой врати</label>
+                                {{ form.doors(class="form-select") }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small text-success text-uppercase">Състояние</label>
+                                {{ form.condition(class="form-select") }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold small text-success text-uppercase">Цвят</label>
+                                {{ form.color(class="form-control", placeholder="Черен...") }}
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow-neon py-2">
+                                    <i class="bi bi-search me-2"></i>ВИЖ РЕЗУЛТАТИТЕ
                                 </button>
                             </div>
                         </div>
+
                     </form>
                 </div>
             </div>
 
             <div id="resultsArea">
                 {% if cars %}
+                    <div class="d-flex justify-content-between align-items-center mb-4 px-2">
+                        <h4 class="text-white-50">Намерени обяви: <span class="text-success">{{ cars|length }}</span></h4>
+                    </div>
+                    
                     <div class="row g-4">
                         {% for car in cars %}
                         <div class="col-md-4 col-lg-3">
                             <div class="card h-100 car-card border-0 rounded-4 overflow-hidden">
                                 <div class="position-relative">
                                     {% if car.images %}
-                                        <img src="{{ url_for('static', filename='uploads/cars/' + car.images[0].image_file) }}" class="card-img-top car-img" alt="{{ car.brand }}">
+                                        <img src="{{ url_for('static', filename='uploads/cars/' + car.images[0].filename) }}" class="card-img-top car-img" alt="{{ car.brand }}">
                                     {% else %}
-                                        <img src="https://via.placeholder.com/400x300?text=No+Image" class="card-img-top car-img" alt="Няма снимка">
+                                        <img src="https://via.placeholder.com/400x300?text=No+Image" class="card-img-top car-img">
                                     {% endif %}
                                     <div class="price-badge">{{ car.price }} €</div>
                                 </div>
-                                <div class="card-body p-3">
+                                <div class="card-body p-3 bg-darker">
                                     <h5 class="card-title fw-bold text-white mb-2">{{ car.brand }} {{ car.model }}</h5>
-                                    <div class="d-flex flex-wrap gap-2 mb-3">
-                                        <span class="badge bg-dark border border-secondary text-light">{{ car.year }} г.</span>
-                                        <span class="badge bg-dark border border-secondary text-light">{{ car.mileage }} км</span>
-                                        <span class="badge bg-dark border border-secondary text-light">{{ car.fuel_type }}</span>
+                                    <div class="car-info-grid mb-3">
+                                        <span class="small text-white-50"><i class="bi bi-calendar-event me-1"></i>{{ car.year }}</span>
+                                        <span class="small text-white-50"><i class="bi bi-speedometer2 me-1"></i>{{ car.mileage }} км</span>
+                                        <span class="small text-white-50"><i class="bi bi-fuel-pump me-1"></i>{{ car.fuel_type }}</span>
+                                        <span class="small text-white-50"><i class="bi bi-gear-wide-connected me-1"></i>{{ car.horsepower }} к.с.</span>
                                     </div>
-                                    <a href="{{ url_for('main.car_detail', car_id=car.id) }}" class="btn btn-outline-success w-100 fw-bold">Преглед</a>
+                                    <a href="{{ url_for('routes.car_detail', id=car.id) }}" class="btn btn-outline-success w-100 fw-bold rounded-pill">Детайли</a>
                                 </div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                 {% else %}
-                    <div class="text-center py-5">
-                        <i class="bi bi-emoji-frown display-1 text-muted"></i>
-                        <h3 class="text-muted mt-3">Не бяха открити обяви по тези критерии.</h3>
-                        <a href="{{ url_for('main.search') }}" class="btn btn-link text-success">Изчисти филтрите</a>
+                    <div class="text-center py-5 border border-secondary border-dashed rounded-4">
+                        <i class="bi bi-search-heart display-1 text-muted"></i>
+                        <h3 class="text-muted mt-3">Няма обяви, отговарящи на тези критерии.</h3>
+                        <a href="{{ url_for('routes.search') }}" class="btn btn-outline-success mt-3">Изчисти филтрите</a>
                     </div>
                 {% endif %}
             </div>
@@ -79,61 +128,78 @@
 </div>
 
 <style>
-    body { background-color: #0f0f0f !important; color: #e0e0e0 !important; }
+    /* Дизайн на страницата */
+    body { background-color: #0b0d10 !important; color: #e0e0e0 !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     
-    /* Стил за картата на търсачката */
-    .card { background: linear-gradient(145deg, #1a1a1a, #121212) !important; border: 1px solid #333 !important; }
+    .bg-darker { background-color: #12151a; }
     
-    /* Стил за селекторите и входовете */
+    .card { background: #161b22 !important; border: 1px solid #30363d !important; }
+    
     .form-control, .form-select { 
-        background-color: #222 !important; 
-        border: 1px solid #444 !important; 
+        background-color: #0d1117 !important; 
+        border: 1px solid #30363d !important; 
         color: #fff !important; 
-        border-radius: 12px !important;
+        border-radius: 10px !important;
+        font-size: 0.95rem;
     }
+
     .form-control:focus, .form-select:focus { 
         border-color: #00ff85 !important; 
-        box-shadow: 0 0 0 0.25rem rgba(0,255,133,0.2) !important; 
+        box-shadow: 0 0 0 0.25rem rgba(0,255,133,0.15) !important; 
+        background-color: #0d1117 !important;
+        color: #fff;
     }
-    .form-label { color: #00ff85 !important; }
 
-    /* Стил за картите с коли */
+    /* Карти на автомобилите */
     .car-card { 
-        transition: transform 0.3s ease, box-shadow 0.3s ease; 
-        background: #161616 !important;
+        transition: all 0.3s ease; 
+        background: #161b22 !important;
+        border: 1px solid transparent !important;
     }
+    
     .car-card:hover { 
-        transform: translateY(-10px); 
-        box-shadow: 0 10px 30px rgba(0,255,133,0.2) !important;
+        transform: translateY(-8px); 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         border: 1px solid #00ff85 !important;
     }
-    .car-img { height: 200px; object-fit: cover; }
+    
+    .car-img { height: 180px; object-fit: cover; }
 
-    /* Бадж за цена */
     .price-badge {
         position: absolute;
-        bottom: 10px;
-        right: 10px;
-        background: linear-gradient(45deg, #00bf63, #00ff85);
-        color: white;
-        padding: 5px 15px;
-        border-radius: 50px;
-        font-weight: bold;
+        bottom: 12px;
+        right: 12px;
+        background: #00ff85;
+        color: #000;
+        padding: 4px 14px;
+        border-radius: 8px;
+        font-weight: 800;
         font-size: 1.1rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .car-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
     }
 
     /* Бутони */
     .btn-success { 
-        background: linear-gradient(45deg, #00bf63, #00ff85) !important; 
-        border: none !important; 
-        border-radius: 12px;
+        background: #00ff85 !important; 
+        color: #000 !important;
+        border: none !important;
     }
+    
+    .btn-success:hover { background: #00e677 !important; transform: scale(1.02); }
+
+    .shadow-neon { box-shadow: 0 0 20px rgba(0,255,133,0.2); }
+
     .btn-outline-success { 
         border: 2px solid #00ff85 !important; 
         color: #00ff85 !important; 
-        border-radius: 10px;
     }
+    
     .btn-outline-success:hover { 
         background: #00ff85 !important; 
         color: #000 !important; 
@@ -141,13 +207,11 @@
 </style>
 
 <script>
-    // Динамично зареждане на модели за търсачката
+    // JS за динамични модели (остава същия)
     document.getElementById('brand-search').addEventListener('change', function() {
         const brand = this.value;
         const modelSelect = document.getElementById('model-search');
-        
         modelSelect.innerHTML = '<option value="">Зареждане...</option>';
-        
         if (brand) {
             fetch(`/api/models/${encodeURIComponent(brand)}`)
                 .then(response => response.json())
@@ -159,10 +223,6 @@
                         opt.textContent = m;
                         modelSelect.appendChild(opt);
                     });
-                })
-                .catch(err => {
-                    console.error("Грешка при зареждане на моделите:", err);
-                    modelSelect.innerHTML = '<option value="">Всички модели</option>';
                 });
         } else {
             modelSelect.innerHTML = '<option value="">Всички модели</option>';

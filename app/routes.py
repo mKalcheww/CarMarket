@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, current_app, jsonify, request
 from flask_login import login_user, logout_user, login_required, current_user
 from .models import User, Car, CarImage, db
-from .forms import RegisterForm, LoginForm, CarForm
+from .forms import RegistrationForm, LoginForm, CarForm, SearchForm
 from werkzeug.utils import secure_filename
 import os
 import time
@@ -36,7 +36,7 @@ def get_models_api(brand):
 # Регистрация
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegisterForm()
+    form = RegistrationForm()
     if form.validate_on_submit():
         # ПРОВЕРКА: Съществува ли вече такъв потребител?
         existing_user = User.query.filter_by(username=form.username.data).first()
@@ -231,36 +231,39 @@ def delete_car(id):
 
 @bp.route('/search')
 def search():
-    query = Car.query
-    # Използваме joinedload за да вземем снимките с една заявка
-    query = query.options(joinedload(Car.images))
+    form = SearchForm(request.args)
+    
+    # Динамично зареждане на моделите, ако има избрана марка
+    if form.brand.data:
+        form.model.choices = [('', 'Всички модели')] + [(m, m) for m in CAR_BRANDS.get(form.brand.data, [])]
 
-    # Филтри
-    if request.args.get('brand'):
-        query = query.filter(Car.brand == request.args.get('brand'))
-    if request.args.get('model'):
-        query = query.filter(Car.model == request.args.get('model'))
-    if request.args.get('price_min'):
-        query = query.filter(Car.price >= int(request.args.get('price_min')))
-    if request.args.get('price_max'):
-        query = query.filter(Car.price <= int(request.args.get('price_max')))
-    if request.args.get('year_min'):
-        query = query.filter(Car.year >= int(request.args.get('year_min')))
-    if request.args.get('year_max'):
-        query = query.filter(Car.year <= int(request.args.get('year_max')))
-    if request.args.get('fuel'):
-        query = query.filter(Car.fuel == request.args.get('fuel'))
+    query = Car.query.options(joinedload(Car.images))
 
-    # Сортиране
-    sort = request.args.get('sort', 'latest')
-    if sort == 'price_asc':
-        query = query.order_by(Car.price.asc())
-    elif sort == 'price_desc':
-        query = query.order_by(Car.price.desc())
-    elif sort == 'oldest':
-        query = query.order_by(Car.created_at.asc())
-    else:
-        query = query.order_by(Car.created_at.desc())
+    # ПРИЛАГАНЕ НА ВСИЧКИ ФИЛТРИ
+    if form.brand.data:
+        query = query.filter(Car.brand == form.brand.data)
+    if form.model.data:
+        query = query.filter(Car.model == form.model.data)
+    if form.min_price.data:
+        query = query.filter(Car.price >= form.min_price.data)
+    if form.max_price.data:
+        query = query.filter(Car.price <= form.max_price.data)
+    if form.min_year.data:
+        query = query.filter(Car.year >= int(form.min_year.data))
+    if form.max_year.data:
+        query = query.filter(Car.year <= int(form.max_year.data))
+    if form.fuel_type.data:
+        query = query.filter(Car.fuel_type == form.fuel_type.data)
+    if form.transmission.data:
+        query = query.filter(Car.transmission == form.transmission.data)
+    if form.condition.data:
+        query = query.filter(Car.condition == form.condition.data)
+    if form.doors.data:
+        query = query.filter(Car.doors == form.doors.data)
+    if form.min_hp.data:
+        query = query.filter(Car.horsepower >= form.min_hp.data)
+    if form.max_hp.data:
+        query = query.filter(Car.horsepower <= form.max_hp.data)
 
     cars = query.all()
-    return render_template('search.html', cars=cars, sort=sort)
+    return render_template('search.html', cars=cars, form=form)
