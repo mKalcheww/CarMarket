@@ -3,164 +3,206 @@
 {% block title %}{{ car.brand }} {{ car.model }} - CarMarket{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-4">
     <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('routes.index') }}" class="text-success text-decoration-none">Начало</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('routes.search') }}" class="text-success text-decoration-none">Обяви</a></li>
-            <li class="breadcrumb-item active text-white opacity-50" aria-current="page">{{ car.brand }} {{ car.model }}</li>
+        <ol class="breadcrumb bg-dark p-3 rounded-4 border border-secondary border-opacity-25 shadow-sm">
+            <li class="breadcrumb-item"><a href="{{ url_for('routes.index') }}" class="text-success text-decoration-none fw-bold">Начало</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('routes.search') }}" class="text-success text-decoration-none fw-bold">Обяви</a></li>
+            <li class="breadcrumb-item active text-white opacity-75" aria-current="page">{{ car.brand }} {{ car.model }}</li>
         </ol>
     </nav>
 
-    <div class="row g-5">
+    <div class="row g-4">
         <div class="col-lg-8">
-            <div class="main-image-container rounded-4 overflow-hidden mb-3 shadow-lg border border-secondary border-opacity-25 bg-dark">
-                {% if car.images %}
-                    {% set main_img = car.images|selectattr("is_main")|first or car.images[0] %}
-                    <img src="{{ url_for('static', filename='uploads/cars/' + main_img.filename) }}" 
-                         id="mainDisplayImage" class="img-fluid w-100 object-fit-cover" style="max-height: 500px;" alt="Car Image">
-                {% else %}
-                    <div class="bg-dark d-flex align-items-center justify-content-center" style="height: 400px;">
-                        <i class="bi bi-camera fs-1 text-secondary"></i>
-                    </div>
+            <div id="carCarousel" class="carousel slide rounded-4 overflow-hidden shadow-lg border border-secondary border-opacity-25 bg-dark mb-3" data-bs-ride="false">
+                <div class="carousel-inner">
+                    {% if car.images %}
+                        {% for img in car.images %}
+                        <div class="carousel-item {% if loop.first %}active{% endif %}">
+                            <img src="{{ url_for('static', filename='uploads/cars/' + img.filename) }}" 
+                                 class="d-block w-100 object-fit-cover main-display-img cursor-zoom-in" 
+                                 style="height: 500px;" 
+                                 alt="Car Image"
+                                 onclick="openLightbox({{ loop.index0 }})">
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="carousel-item active">
+                            <div class="bg-dark d-flex align-items-center justify-content-center" style="height: 500px;">
+                                <i class="bi bi-camera fs-1 text-secondary"></i>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {% if car.images|length > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#carCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Предишна</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Следваща</span>
+                </button>
                 {% endif %}
             </div>
 
             {% if car.images|length > 1 %}
-            <div class="row g-2 mb-4">
+            <div class="row g-2 mb-4 px-1">
                 {% for img in car.images %}
-                <div class="col-3 col-md-2">
-                    <div class="ratio ratio-4x3 rounded-3 overflow-hidden border border-secondary border-opacity-50 cursor-pointer thumbnail-box">
+                <div class="col-auto">
+                    <div class="ratio ratio-4x3 rounded-3 overflow-hidden border border-secondary border-opacity-50 cursor-pointer thumbnail-box shadow-sm" 
+                         style="width: 80px;" 
+                         onclick="goToSlide({{ loop.index0 }})">
                         <img src="{{ url_for('static', filename='uploads/cars/' + img.filename) }}" 
-                             class="img-fluid object-fit-cover" 
-                             onclick="document.getElementById('mainDisplayImage').src=this.src" alt="Thumbnail">
+                             class="w-100 h-100 object-fit-cover" alt="Thumbnail">
                     </div>
                 </div>
                 {% endfor %}
             </div>
             {% endif %}
 
-            <div class="card bg-dark border-secondary border-opacity-25 rounded-4 p-4 shadow-sm">
-                <h4 class="text-white fw-bold mb-3">Описание на обявата</h4>
-                <p class="text-light opacity-75 lh-lg" style="white-space: pre-line;">
-                    {{ car.description if car.description else "Продавачът не е предоставил допълнително описание." }}
+            <div class="card bg-dark border-secondary border-opacity-25 rounded-4 p-4 shadow-sm mb-4">
+                <h4 class="text-success fw-bold mb-3 border-bottom border-secondary pb-2">Описание</h4>
+                <p class="custom-text-light opacity-75 lh-lg fs-5" style="white-space: pre-line;">
+                    {{ car.description if car.description else "Няма допълнително описание." }}
                 </p>
             </div>
         </div>
 
         <div class="col-lg-4">
-            <div class="card bg-dark border-success border-opacity-25 rounded-4 p-4 shadow-lg mb-4 text-center">
-                <h1 class="display-5 fw-bold text-success mb-1">
-                    {{ "{:,.0f}".format(car.price) | replace(",", " ") }} <small class="fs-4">€</small>
-                </h1>
-                <p class="text-muted small mb-0">Публикувана на {{ car.created_at.strftime("%d.%m.%Y") }}</p>
+            <div class="card bg-dark border-success border-opacity-50 rounded-4 p-4 shadow-lg mb-4 border-start border-4">
+                <h2 class="text-white fw-bold mb-2">{{ car.brand }} {{ car.model }}</h2>
+                <div class="d-flex align-items-baseline">
+                    <h1 class="text-success fw-bold mb-0 me-2">{{ "{:,.0f}".format(car.price) | replace(",", " ") }}</h1>
+                    <span class="text-success fs-3 fw-bold">€</span>
+                </div>
             </div>
 
             <div class="card bg-dark border-secondary border-opacity-25 rounded-4 p-4 shadow-sm mb-4">
-                <h5 class="text-white fw-bold mb-4 border-bottom border-secondary pb-2">Характеристики</h5>
-                
-                <div class="specs-grid">
-                    <div class="d-flex justify-content-between mb-3 spec-item">
-                        <span class="text-muted small"><i class="bi bi-speedometer2 me-2"></i>Пробег</span>
-                        <span class="text-white fw-bold">{{ "{:,.0f}".format(car.mileage) | replace(",", " ") }} км</span>
+                <h5 class="text-white fw-bold mb-4 border-bottom border-secondary pb-2">Детайли</h5>
+                <div class="specs-list">
+                    <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
+                        <span class="text-muted"><i class="bi bi-speedometer2 me-2 text-success"></i>Пробег</span>
+                        <span class="fw-bold">{{ car.mileage }} км</span>
                     </div>
-                    <div class="d-flex justify-content-between mb-3 spec-item">
-                        <span class="text-muted small"><i class="bi bi-fuel-pump me-2"></i>Гориво</span>
-                        <span class="text-white fw-bold">{{ car.fuel }}</span>
+                    <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
+                        <span class="text-muted"><i class="bi bi-fuel-pump me-2 text-success"></i>Гориво</span>
+                        <span class="fw-bold">{{ car.fuel }}</span>
                     </div>
-                    <div class="d-flex justify-content-between mb-3 spec-item">
-                        <span class="text-muted small"><i class="bi bi-gear-wide-connected me-2"></i>Трансмисия</span>
-                        <span class="text-white fw-bold">{{ car.transmission }}</span>
+                    <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
+                        <span class="text-muted"><i class="bi bi-gear-wide-connected me-2 text-success"></i>Трансмисия</span>
+                        <span class="fw-bold">{{ car.transmission }}</span>
                     </div>
-                    <div class="d-flex justify-content-between mb-3 spec-item">
-                        <span class="text-muted small"><i class="bi bi-lightning-charge me-2"></i>Мощност</span>
-                        <span class="text-white fw-bold">{{ car.horsepower }} к.с.</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3 spec-item">
-                        <span class="text-muted small"><i class="bi bi-water me-2"></i>Двигател</span>
-                        <span class="text-white fw-bold">{{ car.engine_size }} ccm</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3 spec-item">
-                        <span class="text-muted small"><i class="bi bi-palette me-2"></i>Цвят</span>
-                        <span class="text-white fw-bold">{{ car.color }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between spec-item">
-                        <span class="text-muted small"><i class="bi bi-info-circle me-2"></i>Състояние</span>
-                        <span class="badge {% if car.condition == 'Нова' %}bg-success text-dark{% else %}bg-secondary{% endif %}">
-                            {{ car.condition }}
-                        </span>
+                    <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
+                        <span class="text-muted"><i class="bi bi-palette me-2 text-success"></i>Цвят</span>
+                        <span class="fw-bold">{{ car.color }}</span>
                     </div>
                 </div>
             </div>
 
             <div class="card bg-dark border-secondary border-opacity-25 rounded-4 p-4 shadow-sm mb-4">
-                <h5 class="text-white fw-bold mb-3">Контакт</h5>
-                <div class="d-flex align-items-center mb-4 text-white">
-                    <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-dark fw-bold" style="width: 45px; height: 45px;">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-dark fw-bold shadow" style="width: 55px; height: 55px;">
                         {{ car.author.username[0] | upper }}
                     </div>
                     <div class="ms-3">
-                        <div class="fw-bold">{{ car.author.username }}</div>
-                        <div class="text-muted small">Продавач</div>
+                        <div class="fw-bold fs-5 text-white">{{ car.author.username }}</div>
+                        <div class="text-success small">Продавач</div>
                     </div>
                 </div>
-                
-                <div class="d-grid gap-2">
-                    <button type="button" class="btn btn-success btn-lg rounded-pill fw-bold text-dark" id="phoneButton">
-                        <i class="bi bi-telephone-fill me-2"></i>Покажи телефон
-                    </button>
-                    <a href="mailto:{{ car.author.email }}" class="btn btn-outline-light rounded-pill">
-                        <i class="bi bi-envelope me-2"></i>Имейл запитване
-                    </a>
+                <div class="d-grid gap-3">
+                    <button type="button" class="btn btn-success btn-lg rounded-pill fw-bold text-dark py-3" id="phoneButton">Покажи телефон</button>
+                    <button type="button" class="btn btn-outline-light btn-lg rounded-pill py-3 fw-bold" id="emailButton">Покажи имейл</button>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
 
-            {% if current_user.is_authenticated %}
-                {% if current_user.id == car.user_id or current_user.is_admin %}
-                <div class="d-grid gap-2">
-                    <a href="{{ url_for('routes.delete_car', id=car.id) }}" 
-                       class="btn btn-danger btn-lg rounded-pill fw-bold" 
-                       onclick="return confirm('Наистина ли искате да изтриете тази обява?')">
-                        <i class="bi bi-trash me-2"></i>Изтрий обявата
-                    </a>
-                    {% if current_user.is_admin and current_user.id != car.user_id %}
-                        <small class="text-center text-warning mt-1">Административен панел</small>
-                    {% endif %}
-                </div>
-                {% endif %}
-            {% endif %}
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body p-0 position-relative text-center">
+                <img src="" id="lightboxImage" class="img-fluid rounded shadow-lg" style="max-height: 90vh;">
+                
+                <button class="btn btn-link text-white position-absolute top-50 start-0 translate-middle-y fs-1" onclick="changeLightbox(-1)">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button class="btn btn-link text-white position-absolute top-50 end-0 translate-middle-y fs-1" onclick="changeLightbox(1)">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+                
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+            </div>
         </div>
     </div>
 </div>
 
 <style>
-    .spec-item span.text-white { color: #ffffff !important; }
-    .thumbnail-box:hover { border-color: #00ff85 !important; transform: scale(1.05); }
-    .main-image-container img { transition: opacity 0.2s; }
+    body { background-color: #0b0c10 !important; }
+    .custom-text-light { color: #e0e0e0 !important; }
+    .text-muted { color: #9da5ad !important; }
+    .thumbnail-box { transition: 0.2s; cursor: pointer; }
+    .thumbnail-box:hover { border-color: #198754 !important; }
+    .cursor-zoom-in { cursor: zoom-in; }
+    .carousel-control-prev, .carousel-control-next { width: 8%; background: rgba(0,0,0,0.3); }
 </style>
 
 <script>
-    // Телефонна логика
-    const phoneBtn = document.getElementById('phoneButton');
-    if (phoneBtn) {
-        phoneBtn.addEventListener('click', function() {
-            const phoneNumber = "{{ car.author.phone_number }}";
-            this.innerHTML = `<i class="bi bi-telephone-outbound-fill me-2"></i> ${phoneNumber}`;
-            this.classList.replace('btn-success', 'btn-outline-success');
-            this.onclick = () => window.location.href = `tel:${phoneNumber}`;
-        });
+    // Масив с всички URL адреси на снимките (предадени от Flask)
+    const allImages = [
+        {% for img in car.images %}
+            "{{ url_for('static', filename='uploads/cars/' + img.filename) }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    let currentImageIndex = 0;
+
+    // Отваряне на Lightbox
+    function openLightbox(index) {
+        currentImageIndex = index;
+        updateLightboxImage();
+        const modal = new bootstrap.Modal(document.getElementById('lightboxModal'));
+        modal.show();
     }
 
-    // Галерия логика
-    document.querySelectorAll('.thumbnail-box img').forEach(img => {
-        img.addEventListener('click', function() {
-            const main = document.getElementById('mainDisplayImage');
-            main.style.opacity = '0.5';
-            setTimeout(() => {
-                main.src = this.src;
-                main.style.opacity = '1';
-            }, 150);
-        });
+    // Смяна на снимка в Lightbox
+    function changeLightbox(direction) {
+        currentImageIndex += direction;
+        if (currentImageIndex >= allImages.length) currentImageIndex = 0;
+        if (currentImageIndex < 0) currentImageIndex = allImages.length - 1;
+        updateLightboxImage();
+    }
+
+    function updateLightboxImage() {
+        document.getElementById('lightboxImage').src = allImages[currentImageIndex];
+    }
+
+    // Навигация на основния Carousel
+    function goToSlide(index) {
+        const carousel = new bootstrap.Carousel(document.getElementById('carCarousel'));
+        carousel.to(index);
+    }
+
+    // Поддръжка на клавиатура (стрелки) за Lightbox
+    document.addEventListener('keydown', function(e) {
+        const modalEl = document.getElementById('lightboxModal');
+        if (modalEl.classList.contains('show')) {
+            if (e.key === "ArrowLeft") changeLightbox(-1);
+            if (e.key === "ArrowRight") changeLightbox(1);
+        }
+    });
+
+    // Бутони за контакт
+    document.getElementById('phoneButton')?.addEventListener('click', function() {
+        this.innerText = "{{ car.author.phone_number }}";
+        this.classList.replace('btn-success', 'btn-outline-success');
+    });
+
+    document.getElementById('emailButton')?.addEventListener('click', function() {
+        this.innerText = "{{ car.author.email }}";
+        this.classList.replace('btn-outline-light', 'btn-outline-success');
     });
 </script>
 {% endblock %}

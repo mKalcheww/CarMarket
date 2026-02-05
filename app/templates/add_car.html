@@ -18,16 +18,16 @@
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Марка <span class="text-danger">*</span></label>
-                                {{ form.brand(class="form-control form-control-lg shadow-sm", placeholder="BMW, Audi, Mercedes...") }}
+                                {{ form.brand(class="form-select form-select-lg shadow-sm", id="brand-select") }}
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Модел <span class="text-danger">*</span></label>
-                                {{ form.model(class="form-control form-control-lg shadow-sm", placeholder="320d, A4, E220...") }}
+                                {{ form.model(class="form-select form-select-lg shadow-sm", id="model-select") }}
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Година <span class="text-danger">*</span></label>
-                                {{ form.year(class="form-control form-control-lg shadow-sm") }}
+                                {{ form.year(class="form-select form-select-lg shadow-sm") }}
                             </div>
                             <div class="col-md-8">
                                 <label class="form-label fw-bold">Цена (€) <span class="text-danger">*</span></label>
@@ -47,7 +47,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Гориво <span class="text-danger">*</span></label>
-                                {{ form.fuel(class="form-select form-select-lg shadow-sm") }}
+                                {{ form.fuel_type(class="form-select form-select-lg shadow-sm") }}
                             </div>
 
                             <div class="col-md-6">
@@ -117,149 +117,116 @@
 </style>
 
 <script>
-    let carId = null;
-    let isUploading = false; // Флаг за контрол на последователността
+    // 1. ЛОГИКА ЗА ДИНАМИЧНИ МОДЕЛИ
+    document.getElementById('brand-select').addEventListener('change', function() {
+        const brand = this.value;
+        const modelSelect = document.getElementById('model-select');
+        modelSelect.innerHTML = '<option value="">Зареждане...</option>';
+        
+        if (brand) {
+            fetch(`/api/models/${encodeURIComponent(brand)}`)
+                .then(response => response.json())
+                .then(models => {
+                    modelSelect.innerHTML = '<option value="">Изберете модел</option>';
+                    models.forEach(m => {
+                        let opt = document.createElement('option');
+                        opt.value = m;
+                        opt.textContent = m;
+                        modelSelect.appendChild(opt);
+                    });
+                });
+        } else {
+            modelSelect.innerHTML = '<option value="">Първо изберете марка</option>';
+        }
+    });
 
-    // Асинхронна функция за обработка на всички файлове последователно
+    // 2. AJAX КАЧВАНЕ НА СНИМКИ (Твоята съществуваща логика)
+    let carId = null;
+    let isUploading = false;
+
     async function processFiles(files) {
         if (isUploading) return;
         isUploading = true;
         
-        // Превръщаме FileList в масив, за да можем да го обходим с for...of
         const fileArray = Array.from(files);
 
         for (const file of fileArray) {
-            
-            // ПЪРВО: Създай обява, ако няма carId (трябва да се случи само веднъж)
-            // ПЪРВО: Създай обява, ако няма carId (трябва да се случи само веднъж)
             if (!carId) {
-                // Извличаме CSRF токена от скритото поле
                 const csrfToken = document.querySelector('input[name="csrf_token"]').value; 
-
                 const formData = new FormData(document.getElementById('carForm'));
                 formData.delete('submit');
-                // ТРЯБВА ДА ГО ДОБАВИМ ИЗРИЧНО КЪМ FormData ЗА AJAX ВАЛИДАЦИЯ
                 formData.append('csrf_token', csrfToken);
                 
-                // ВАЛИДАЦИЯ В JS (за бърза обратна връзка)
-                const requiredFields = ['brand', 'model', 'year', 'price', 'horsepower', 'engine_size', 'fuel', 'mileage', 'transmission', 'color', 'doors', 'condition'];
-                let allFieldsFilled = true;
-                for (const field of requiredFields) {
-                    // Проверяваме и csrf_token, за да не го отчитаме като грешно поле
-                    if (!formData.get(field) && field !== 'csrf_token') { 
-                        allFieldsFilled = false;
-                        break;
-                    }
+                // Проверка на полетата
+                const requiredFields = ['brand', 'model', 'year', 'price', 'horsepower', 'engine_size', 'fuel_type', 'mileage', 'transmission', 'color', 'doors', 'condition'];
+                let allFilled = true;
+                for (const f of requiredFields) {
+                    if (!formData.get(f)) { allFilled = false; break; }
                 }
 
-                if (!allFieldsFilled) {
-                    alert('Преди да качиш снимки, моля попълни всички задължителни полета!');
+                if (!allFilled) {
+                    alert('Попълни първо данните за колата, за да качиш снимки!');
                     isUploading = false;
-                    return; // Спира целия процес на качване
+                    return;
                 }
 
                 const response = await fetch('/add_car', {
                     method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: formData
                 });
                 
-                // ... (БЛОКЪТ ЗА ОБРАБОТКА НА ГРЕШКИ ОСТАВА СЪЩИЯ)
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    let errorMessage = 'Възникна грешка при създаването на обявата! Проверете дали всички полета са валидни.';
-                    
-                    if (errorData.errors && errorData.errors.form && errorData.errors.form.length > 0) {
-                        errorMessage += '\n\nКонкретни грешки:\n' + errorData.errors.form.join('\n');
-                    } else if (response.status >= 500) {
-                         errorMessage = 'Вътрешна грешка на сървъра (Internal Server Error). Проверете конзолата за подробности.';
-                    }
-                    
-                    alert(errorMessage);
+                    const err = await response.json();
+                    alert('Грешка: ' + JSON.stringify(err.errors));
                     isUploading = false;
-                    return; // Спира целия процес на качване
+                    return;
                 }
-                // ... (край на блока за грешки)
                 
                 const data = await response.json();
                 carId = data.car_id;
             }
 
-            // ВТОРО: Качваме текущата снимка
             const uploadData = new FormData();
             uploadData.append('file', file);
 
-            const uploadResponse = await fetch(`/upload_image/${carId}`, {
-                method: 'POST',
-                body: uploadData
-            });
+            const upRes = await fetch(`/upload_image/${carId}`, { method: 'POST', body: uploadData });
 
-            if (uploadResponse.ok) {
-                const result = await uploadResponse.json();
+            if (upRes.ok) {
+                const res = await upRes.json();
                 const preview = document.getElementById('preview');
                 const col = document.createElement('div');
                 col.className = 'col-md-4 col-lg-3 mb-3';
                 col.innerHTML = `
                     <div class="rounded-3 overflow-hidden shadow-lg border border-success border-opacity-50">
-                        <img src="${result.url}" class="w-100" style="height:220px; object-fit:cover;">
-                        <div class="bg-dark bg-dark bg-opacity-90 text-center py-2">
-                            <small class="text-white">${file.name}</small>
-                            ${result.is_main ? '<span class="badge bg-success ms-2">Главна</span>' : ''}
+                        <img src="${res.url}" class="w-100 preview-img">
+                        <div class="bg-dark text-center py-2">
+                            <small class="text-white">${file.name.substring(0,15)}...</small>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 preview.appendChild(col);
-            } else {
-                alert(`Грешка при качване на ${file.name}. Може да е невалиден формат или размер.`);
             }
         }
-        
         isUploading = false;
     }
 
-    // Drag & Drop
+    // Drag & Drop / Click Handlers (Твоите оригинални)
     const dropZone = document.getElementById('dropZone');
-    dropZone.onclick = () => document.querySelector('#fileInput')?.click() || (() => {
+    dropZone.onclick = () => {
         const input = document.createElement('input');
-        input.type = 'file';
-        input.multiple = true;
-        input.accept = 'image/*';
-        input.id = 'fileInput';
-        input.style.display = 'none';
-        document.body.appendChild(input);
-        input.onchange = e => {
-            processFiles(e.target.files); // Извикваме новата, последователна функция
-        };
+        input.type = 'file'; input.multiple = true; input.accept = 'image/*';
+        input.onchange = e => processFiles(e.target.files);
         input.click();
-    })();
-
-    dropZone.ondrop = e => {
-        e.preventDefault();
-        dropZone.style.backgroundColor = '';
-        processFiles(e.dataTransfer.files); // Извикваме новата, последователна функция
     };
 
-    dropZone.ondragover = dropZone.ondragenter = e => {
-        e.preventDefault();
-        dropZone.style.backgroundColor = 'rgba(0,255,133,0.15)';
-    };
+    dropZone.ondrop = e => { e.preventDefault(); processFiles(e.dataTransfer.files); };
+    dropZone.ondragover = e => { e.preventDefault(); dropZone.style.backgroundColor = 'rgba(0,255,133,0.15)'; };
+    dropZone.ondragleave = () => { dropZone.style.backgroundColor = ''; };
 
-    dropZone.ondragleave = () => {
-        dropZone.style.backgroundColor = '';
-    };
-
-    // Публикуване (финална стъпка)
     document.getElementById('carForm').onsubmit = e => {
         e.preventDefault();
-        if (!carId) {
-            alert('Качи поне една снимка, за да финализираш обявата!');
-            return;
-        }
-        // Пренасочваме към детайлния изглед на току-що създадената обява
+        if (!carId) { alert('Качи снимки!'); return; }
         location.href = `/car/${carId}`;
     };
 </script>
-
 {% endblock %}

@@ -12,10 +12,10 @@ class User(UserMixin, db.Model):
     cars = db.relationship('Car', backref='author', lazy=True)
 class Car(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    brand = db.Column(db.String(50), nullable=False)
-    model = db.Column(db.String(100), nullable=False)
-    year = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Integer, nullable=False)
+    brand = db.Column(db.String(50), nullable=False, index=True) # Добавен индекс
+    model = db.Column(db.String(100), nullable=False, index=True) # Добавен индекс
+    year = db.Column(db.Integer, nullable=False, index=True)  # Добавен индекс
+    price = db.Column(db.Integer, nullable=False, index=True) # Добавен индекс
     horsepower = db.Column(db.Integer, nullable=False)
     fuel = db.Column(db.String(30), nullable=False)  # Бензин, Дизел, Електро, Хибрид, LPG
     mileage = db.Column(db.Integer, nullable=False)  # пробег в км

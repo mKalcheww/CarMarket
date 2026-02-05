@@ -1,46 +1,76 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, IntegerField, FloatField, TextAreaField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, IntegerField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
-from flask_wtf.file import FileAllowed
+from app.constants import CAR_BRANDS
+import datetime
 
-class RegisterForm(FlaskForm):
-    username = StringField('Потребителско име', validators=[DataRequired(), Length(min=4, max=20)])
-    email = StringField('Имейл', validators=[DataRequired(), Email()])
-    phone_number = StringField('Телефонен номер', validators=[DataRequired(), Length(min=7, max=15)]) # Добавено
+# Генерираме списък с години от текущата назад до 1950
+current_year = datetime.datetime.now().year
+YEAR_CHOICES = [(str(y), str(y)) for y in range(current_year, 1949, -1)]
+
+class RegistrationForm(FlaskForm):
+    username = StringField('Потребителско име', validators=[DataRequired(), Length(min=2, max=20)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Парола', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField('Потвърди парола', validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Регистрирай се')
+    confirm_password = PasswordField('Потвърди Парола', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Регистрация')
 
 class LoginForm(FlaskForm):
-    username = StringField('Потребител', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Парола', validators=[DataRequired()])
     submit = SubmitField('Вход')
 
 class CarForm(FlaskForm):
-    brand = StringField('Марка', validators=[DataRequired()])
-    model = StringField('Модел', validators=[DataRequired()])
-    year = IntegerField('Година', validators=[DataRequired(), NumberRange(min=1900, max=2026)])
-    price = IntegerField('Цена (лв.)', validators=[DataRequired(), NumberRange(min=100)])
-    horsepower = IntegerField('Конски сили', validators=[DataRequired(), NumberRange(min=30, max=2000)])
-    fuel = SelectField('Гориво', choices=[
+    # Марка - зарежда се от constants.py
+    brand = SelectField('Марка', 
+                        choices=[('', 'Изберете марка')] + [(b, b) for b in sorted(CAR_BRANDS.keys())], 
+                        validators=[DataRequired()])
+    
+    # Модел - ще се пълни динамично чрез JS, но дефинираме начално състояние
+    model = SelectField('Модел', choices=[('', 'Първо изберете марка')], validators=[DataRequired()])
+    
+    year = SelectField('Година на производство', choices=YEAR_CHOICES, validators=[DataRequired()])
+    
+    price = IntegerField('Цена (в лв.)', validators=[DataRequired(), NumberRange(min=1)])
+    
+    mileage = IntegerField('Пробег (км)', validators=[DataRequired(), NumberRange(min=0)])
+    
+    engine_size = IntegerField('Двигател (куб. см)', validators=[DataRequired(), NumberRange(min=500)])
+    
+    fuel_type = SelectField('Тип гориво', choices=[
         ('Бензин', 'Бензин'),
         ('Дизел', 'Дизел'),
-        ('Електрически', 'Електрически'),
+        ('Газ/Бензин', 'Газ/Бензин'),
         ('Хибрид', 'Хибрид'),
-        ('Пропан-бутан', 'LPG')
+        ('Електричество', 'Електричество')
     ], validators=[DataRequired()])
-    mileage = IntegerField('Пробег (км)', validators=[DataRequired(), NumberRange(min=0, max=999999)])
-    engine_size = IntegerField('Кубатура (ccm)', validators=[DataRequired(), NumberRange(min=500, max=8000)])
+    
     transmission = SelectField('Скоростна кутия', choices=[
         ('Ръчна', 'Ръчна'),
         ('Автоматична', 'Автоматична')
     ], validators=[DataRequired()])
-    color = StringField('Цвят', validators=[DataRequired()])
-    doors = SelectField('Брой врати', choices=[(3, '2/3'), (5, '4/5')], validators=[DataRequired()])
+    
     condition = SelectField('Състояние', choices=[
-        ('Нова', 'Нова'),
-        ('Употребявана', 'Употребявана'),
+        ('Употребяван', 'Употребяван'),
+        ('Нов', 'Нов'),
         ('За части', 'За части')
     ], validators=[DataRequired()])
-    description = TextAreaField('Описание')
+    
+    description = TextAreaField('Допълнителна информация', validators=[Length(max=1000)])
+    
     submit = SubmitField('Публикувай обявата')
+
+class SearchForm(FlaskForm):
+    brand = SelectField('Марка', choices=[('', 'Всички марки')] + [(b, b) for b in sorted(CAR_BRANDS.keys())])
+    model = SelectField('Модел', choices=[('', 'Всички модели')])
+    
+    min_price = IntegerField('Мин. цена')
+    max_price = IntegerField('Макс. цена')
+    
+    condition = SelectField('Състояние', choices=[
+        ('', 'Всички'),
+        ('Употребяван', 'Употребяван'),
+        ('Нов', 'Нов')
+    ])
+    
+    submit = SubmitField('Търси')
