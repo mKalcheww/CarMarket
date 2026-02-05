@@ -120,7 +120,7 @@ def add_car():
             price=form.price.data,
             horsepower=form.horsepower.data,
             engine_size=form.engine_size.data,
-            fuel_type=form.fuel_type.data, # Провери дали името съвпада с модела ти
+            fuel=form.fuel_type.data, # Провери дали името съвпада с модела ти
             mileage=form.mileage.data,
             transmission=form.transmission.data,
             color=form.color.data,
