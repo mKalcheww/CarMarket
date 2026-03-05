@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Редактирай обява – CarMarket{% endblock %}
+
+{% block content %}
+<div class="container py-5 min-vh-100">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h1 class="display-5 fw-bold text-center mb-5 text-success">Редактирай обява</h1>
+
+            <div class="card shadow-lg border-0 rounded-4 bg-dark text-light">
+                <div class="card-body p-5">
+                    <form method="POST" enctype="multipart/form-data" id="carForm" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-success">Марка</label>
+                                {{ form.brand(class="form-select border-secondary bg-dark text-white shadow-sm", id="brand-select") }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-success">Модел</label>
+                                {{ form.model(class="form-select border-secondary bg-dark text-white shadow-sm", id="model-select") }}
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-success">Година</label>
+                                {{ form.year(class="form-select border-secondary bg-dark text-white shadow-sm") }}
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label fw-bold text-success">Цена (€)</label>
+                                <div class="input-group">
+                                    {{ form.price(class="form-control border-secondary bg-dark text-white shadow-sm") }}
+                                    <span class="input-group-text bg-success text-white border-0">€</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-success">Гориво</label>
+                                {{ form.fuel_type(class="form-select border-secondary bg-dark text-white shadow-sm") }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-success">Скорости</label>
+                                {{ form.transmission(class="form-select border-secondary bg-dark text-white shadow-sm") }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-success">Пробег</label>
+                                {{ form.mileage(class="form-control border-secondary bg-dark text-white shadow-sm") }}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-success">Описание</label>
+                                {{ form.description(class="form-control border-secondary bg-dark text-white shadow-sm", rows="4") }}
+                            </div>
+
+                            <div class="col-12 mt-5">
+                                <h4 class="text-success mb-4 border-bottom border-success pb-2">Управление на снимки</h4>
+                                
+                                <div id="existing-photos" class="row g-3 mb-4">
+                                    {% for img in car.images %}
+                                    <div class="col-md-3 col-6 position-relative" id="img-container-{{ img.id }}">
+                                        <div class="preview-card border border-secondary rounded-3 overflow-hidden">
+                                            <img src="{{ url_for('static', filename='uploads/cars/' + img.filename) }}" class="img-fluid" style="height: 150px; width: 100%; object-fit: cover;">
+                                            <button type="button" 
+                                                    onclick="deleteImage({{ img.id }})" 
+                                                    class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 shadow">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                            {% if img.is_main %}
+                                            <div class="bg-success text-white text-center py-1 small fw-bold">Главна</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+                                <div id="dropZone" class="border border-2 border-dashed border-success rounded-4 p-5 text-center" style="cursor: pointer; background: rgba(25, 135, 84, 0.05);">
+                                    <i class="bi bi-cloud-upload fs-1 text-success"></i>
+                                    <p class="mt-2 fw-bold text-success">Кликни или пусни нови снимки тук</p>
+                                </div>
+                                <div id="preview" class="row mt-4 g-3"></div>
+                            </div>
+
+                            <div class="col-12 text-center mt-5">
+                                <button type="submit" class="btn btn-success btn-lg px-5 shadow">Запази промените</button>
+                                <a href="{{ url_for('routes.my_cars') }}" class="btn btn-outline-light btn-lg px-4 ms-2">Отказ</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const carId = {{ car.id }};
+
+// Функция за ИЗТРИВАНЕ
+async function deleteImage(imgId) {
+    if (!confirm('Сигурни ли сте, че искате да изтриете тази снимка?')) return;
+    
+    try {
+        const response = await fetch(`/delete_image/${imgId}`, { method: 'POST' });
+        if (response.ok) {
+            document.getElementById(`img-container-${imgId}`).remove();
+        } else {
+            alert('Грешка при изтриването.');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// Логика за добавяне на нови снимки (същата, но със зелени превюта)
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+async function uploadFiles(files) {
+    for (const file of files) {
+        const formData = new FormData();
+        formData.append('file', file);
+        const resp = await fetch(`/upload_image/${carId}`, { method: 'POST', body: formData });
+        if (resp.ok) {
+            const res = await resp.json();
+            const div = document.createElement('div');
+            div.className = 'col-md-3 col-6';
+            div.innerHTML = `
+                <div class="preview-card border border-success rounded-3 overflow-hidden">
+                    <img src="${res.url}" class="img-fluid" style="height: 150px; width: 100%; object-fit: cover;">
+                    <div class="bg-success text-white text-center py-1 small">Току-що качена</div>
+                </div>`;
+            document.getElementById('preview').appendChild(div);
+        }
+    }
+}
+
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (e) => uploadFiles(e.target.files));
+</script>
+
+<style>
+    .border-dashed { border-style: dashed !important; }
+    .form-control:focus, .form-select:focus { border-color: #198754; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25); }
+    .preview-card { transition: transform 0.2s; }
+    .preview-card:hover { transform: scale(1.02); }
+</style>
+{% endblock %}

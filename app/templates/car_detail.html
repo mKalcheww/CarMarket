@@ -75,35 +75,62 @@
                 <h2 class="text-white fw-bold mb-2">{{ car.brand }} {{ car.model }}</h2>
                 <div class="d-flex align-items-baseline">
                     <h1 class="text-success fw-bold mb-0 me-2">{{ "{:,.0f}".format(car.price) | replace(",", " ") }}</h1>
-                    <span class="text-success fs-3 fw-bold">€</span>
+                    <span class="text-success fs-3 fw-bold">Евр.</span>
+                </div>
+                <div class="text-white-50 mt-2 small">
+                    <i class="bi bi-clock me-1"></i> Публикувана на: {{ car.created_at.strftime('%d.%m.%Y') }}
                 </div>
             </div>
 
             <div class="card bg-dark border-secondary border-opacity-25 rounded-4 p-4 shadow-sm mb-4">
-                <h5 class="text-white fw-bold mb-4 border-bottom border-secondary pb-2">Детайли</h5>
+                <h5 class="text-white fw-bold mb-4 border-bottom border-secondary pb-2">Характеристики</h5>
                 <div class="specs-list">
                     <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
+                        <span class="text-muted"><i class="bi bi-calendar3 me-2 text-success"></i>Година</span>
+                        <span class="fw-bold">{{ car.year }} г.</span>
+                    </div>
+                     <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
                         <span class="text-muted"><i class="bi bi-speedometer2 me-2 text-success"></i>Пробег</span>
-                        <span class="fw-bold">{{ car.mileage }} км</span>
+                        <span class="fw-bold">{{ "{:,.0f}".format(car.mileage) | replace(",", " ") }} км</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
                         <span class="text-muted"><i class="bi bi-fuel-pump me-2 text-success"></i>Гориво</span>
                         <span class="fw-bold">{{ car.fuel }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
-                        <span class="text-muted"><i class="bi bi-gear-wide-connected me-2 text-success"></i>Трансмисия</span>
+                        <span class="text-muted"><i class="bi bi-lightning-charge me-2 text-success"></i>Мощност</span>
+                        <span class="fw-bold">{{ car.horsepower }} к.с.</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
+                        <span class="text-muted"><i class="bi bi-gear me-2 text-success"></i>Кубатура</span>
+                        <span class="fw-bold">{{ car.engine_size }} cm³</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
+                        <span class="text-muted"><i class="bi bi-gear-wide-connected me-2 text-success"></i>Скорости</span>
                         <span class="fw-bold">{{ car.transmission }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
+                        <span class="text-muted"><i class="bi bi-door-open me-2 text-success"></i>Врати</span>
+                        <span class="fw-bold">{{ car.doors }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
                         <span class="text-muted"><i class="bi bi-palette me-2 text-success"></i>Цвят</span>
                         <span class="fw-bold">{{ car.color }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
+                        <span class="text-muted"><i class="bi bi-stars me-2 text-success"></i>Състояние</span>
+                        <span class="fw-bold">{{ car.condition }}</span>
+                    </div>
+                     <div class="d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10 text-white">
+                        <span class="text-muted"><i class="bi bi-geo-alt me-2 text-success"></i>Локация</span>
+                        <span class="fw-bold">{{ car.location }}</span>
                     </div>
                 </div>
             </div>
 
             <div class="card bg-dark border-secondary border-opacity-25 rounded-4 p-4 shadow-sm mb-4">
                 <div class="d-flex align-items-center mb-4">
-                    <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-dark fw-bold shadow" style="width: 55px; height: 55px;">
+                    <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-dark fw-bold shadow" style="width: 55px; height: 55px; font-size: 1.5rem;">
                         {{ car.author.username[0] | upper }}
                     </div>
                     <div class="ms-3">
@@ -112,10 +139,38 @@
                     </div>
                 </div>
                 <div class="d-grid gap-3">
-                    <button type="button" class="btn btn-success btn-lg rounded-pill fw-bold text-dark py-3" id="phoneButton">Покажи телефон</button>
-                    <button type="button" class="btn btn-outline-light btn-lg rounded-pill py-3 fw-bold" id="emailButton">Покажи имейл</button>
+                    <button type="button" class="btn btn-success btn-lg rounded-pill fw-bold text-dark py-3" id="phoneButton">
+                        <i class="bi bi-telephone-fill me-2"></i>Покажи телефон
+                    </button>
+                    <button type="button" class="btn btn-outline-light btn-lg rounded-pill py-3 fw-bold" id="emailButton">
+                        <i class="bi bi-envelope-fill me-2"></i>Покажи имейл
+                    </button>
                 </div>
             </div>
+
+            {% if current_user.is_authenticated %}
+                {% if current_user.id == car.author.id or current_user.is_admin %}
+                <div class="card bg-dark border-warning border-opacity-50 rounded-4 p-4 shadow-sm">
+                    <h5 class="text-warning fw-bold mb-3"><i class="bi bi-shield-lock me-2"></i>Управление на обявата</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('routes.edit_car', id=car.id) }}" class="btn btn-outline-warning fw-bold rounded-pill">
+                            <i class="bi bi-pencil-square me-2"></i>Редактирай
+                        </a>
+                        <a href="{{ url_for('routes.delete_car', id=car.id) }}" 
+                           class="btn btn-outline-danger fw-bold rounded-pill"
+                           onclick="return confirm('Сигурни ли сте, че искате да изтриете тази обява? Това действие е необратимо!');">
+                            <i class="bi bi-trash3-fill me-2"></i>Изтрий обявата
+                        </a>
+                    </div>
+                    {% if current_user.is_admin and current_user.id != car.author.id %}
+                        <div class="text-center mt-2 text-danger small fw-bold">
+                            * Виждате това като Администратор
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endif %}
+
         </div>
     </div>
 </div>
@@ -150,7 +205,7 @@
 </style>
 
 <script>
-    // Масив с всички URL адреси на снимките (предадени от Flask)
+    // Масив с URL адреси на снимките
     const allImages = [
         {% for img in car.images %}
             "{{ url_for('static', filename='uploads/cars/' + img.filename) }}"{% if not loop.last %},{% endif %}
@@ -159,7 +214,6 @@
     
     let currentImageIndex = 0;
 
-    // Отваряне на Lightbox
     function openLightbox(index) {
         currentImageIndex = index;
         updateLightboxImage();
@@ -167,7 +221,6 @@
         modal.show();
     }
 
-    // Смяна на снимка в Lightbox
     function changeLightbox(direction) {
         currentImageIndex += direction;
         if (currentImageIndex >= allImages.length) currentImageIndex = 0;
@@ -179,13 +232,12 @@
         document.getElementById('lightboxImage').src = allImages[currentImageIndex];
     }
 
-    // Навигация на основния Carousel
     function goToSlide(index) {
         const carousel = new bootstrap.Carousel(document.getElementById('carCarousel'));
         carousel.to(index);
     }
 
-    // Поддръжка на клавиатура (стрелки) за Lightbox
+    // Клавишна навигация
     document.addEventListener('keydown', function(e) {
         const modalEl = document.getElementById('lightboxModal');
         if (modalEl.classList.contains('show')) {
@@ -196,12 +248,18 @@
 
     // Бутони за контакт
     document.getElementById('phoneButton')?.addEventListener('click', function() {
-        this.innerText = "{{ car.author.phone_number }}";
-        this.classList.replace('btn-success', 'btn-outline-success');
+        // Проверка дали телефонният номер съществува
+        const phone = "{{ car.author.phone_number }}";
+        if (phone && phone !== 'None') {
+             this.innerHTML = '<i class="bi bi-telephone-fill me-2"></i>' + phone;
+             this.classList.replace('btn-success', 'btn-outline-success');
+        } else {
+             this.innerHTML = 'Няма посочен телефон';
+        }
     });
 
     document.getElementById('emailButton')?.addEventListener('click', function() {
-        this.innerText = "{{ car.author.email }}";
+        this.innerHTML = '<i class="bi bi-envelope-fill me-2"></i>' + "{{ car.author.email }}";
         this.classList.replace('btn-outline-light', 'btn-outline-success');
     });
 </script>

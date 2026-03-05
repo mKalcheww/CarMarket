@@ -1,5 +1,5 @@
 # app/routes.py
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, current_app, jsonify, request
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, current_app, jsonify, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from .models import User, Car, CarImage, db
 from .forms import RegistrationForm, LoginForm, CarForm, SearchForm
@@ -10,6 +10,7 @@ from sqlalchemy.orm import joinedload
 from werkzeug.security import generate_password_hash, check_password_hash # Явен импорт на security функциите
 from functools import wraps
 from app.constants import CAR_BRANDS
+import os 
 
 def admin_required(f):
     @wraps(f)
@@ -207,27 +208,97 @@ def car_detail(id):
     other_images = [img for img in car.images if img != main_image]
     return render_template('car_detail.html', car=car, main_image=main_image, other_images=other_images)
 
-# Изтриване на обява (само собственик или админ)
-@bp.route('/delete_car/<int:id>')
+# --- Добави това в app/routes.py ---
+
+# 1. Логика за редактиране
+# app/routes.py
+
+@bp.route('/edit_car/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_car(id):
+    car = Car.query.get_or_404(id)
+    
+    # Сигурност: Само собственикът или админ може да редактира
+    if car.user_id != current_user.id and not getattr(current_user, 'is_admin', False):
+        flash('Нямате право да редактирате тази обява!', 'danger')
+        return redirect(url_for('routes.index'))
+
+    # Прехвърляме данните от обекта Car към формата
+    form = CarForm(obj=car)
+    
+    # Ръчно задаваме choices за модела, за да не гърми валидацията
+    form.model.choices = [(m, m) for m in CAR_BRANDS.get(car.brand, [])]
+
+    if form.validate_on_submit():
+        # Обновяваме полетата на съществуващия обект
+        car.brand = form.brand.data
+        car.model = form.model.data
+        car.year = form.year.data
+        car.price = form.price.data
+        car.horsepower = form.horsepower.data
+        car.engine_size = form.engine_size.data
+        car.fuel_type = form.fuel_type.data
+        car.mileage = form.mileage.data
+        car.transmission = form.transmission.data
+        car.color = form.color.data
+        car.doors = form.doors.data
+        car.condition = form.condition.data
+        car.description = form.description.data
+        
+        db.session.commit()
+        flash('Обявата беше обновена успешно!', 'success')
+        return redirect(url_for('routes.car_detail', id=car.id))
+    
+    # Попълваме fuel_type ръчно, ако имената в модела и формата се различават (fuel vs fuel_type)
+    if request.method == 'GET':
+        form.fuel_type.data = car.fuel # Ако в модела ти се казва 'fuel'
+
+    return render_template('edit_car.html', form=form, car=car)
+
+@bp.route('/delete_image/<int:image_id>', methods=['POST'])
+@login_required
+def delete_image(image_id):
+    image = CarImage.query.get_or_404(image_id)
+    car = Car.query.get(image.car_id)
+    
+    # Проверка за права
+    if car.user_id != current_user.id and not getattr(current_user, 'is_admin', False):
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    try:
+        # Изтриване на файла от диска
+        file_path = os.path.join(current_app.root_path, 'static/uploads/cars', image.filename)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        
+        # Изтриване от базата данни
+        db.session.delete(image)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+# 2. Логика за изтриване
+@bp.route('/delete_car/<int:id>') # Махнахме POST за по-лесно връзване с линк бутон
 @login_required
 def delete_car(id):
     car = Car.query.get_or_404(id)
-    
-    # ПРОВЕРКА ЗА is_admin (След като добавиш полето и направиш миграцията)
-    if car.user_id != current_user.id and not getattr(current_user, 'is_admin', False):
-        flash('Нямате право да изтриете тази обява!', 'danger')
-        return redirect(url_for('routes.index'))
 
-    # Изтриваме снимките от диска
-    for img in car.images:
-        path = os.path.join(current_app.config['UPLOAD_FOLDER'], img.filename)
-        if os.path.exists(path):
-            os.remove(path)
+    # Проверка: Само собственикът или Админ могат да трият
+    if car.author != current_user and not getattr(current_user, 'is_admin', False):
+        flash('Нямате право да изтриете тази обява.', 'danger')
+        return redirect(url_for('routes.my_cars'))
 
+    # Изтриване на картинките (по желание, тук само записа в базата)
     db.session.delete(car)
     db.session.commit()
-    flash('Обявата е изтрита успешно', 'success')
-    return redirect(url_for('routes.my_cars') if car.user_id == current_user.id else url_for('routes.index'))
+    flash('Обявата беше изтрита.', 'success')
+    
+    # Ако е админ и трие чужда кола, го връщаме в общия списък, иначе в "Моите обяви"
+    if request.referrer and 'car_detail' in request.referrer:
+        return redirect(url_for('routes.index'))
+        
+    return redirect(url_for('routes.my_cars'))
 
 @bp.route('/search')
 def search():
