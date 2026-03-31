@@ -61,7 +61,7 @@
                                         <div class="preview-card border border-secondary rounded-3 overflow-hidden">
                                             <img src="{{ url_for('static', filename='uploads/cars/' + img.filename) }}" class="img-fluid" style="height: 150px; width: 100%; object-fit: cover;">
                                             <button type="button" 
-                                                    onclick="deleteImage({{ img.id }})" 
+                                                    onclick="deleteImage( img.id )" 
                                                     class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 shadow">
                                                 <i class="bi bi-trash"></i>
                                             </button>
@@ -94,7 +94,7 @@
 </div>
 
 <script>
-const carId = {{ car.id }};
+const carId =  car.id;
 
 // Функция за ИЗТРИВАНЕ
 async function deleteImage(imgId) {

@@ -23,7 +23,7 @@
                                  class="d-block w-100 object-fit-cover main-display-img cursor-zoom-in" 
                                  style="height: 500px;" 
                                  alt="Car Image"
-                                 onclick="openLightbox({{ loop.index0 }})">
+                                 onclick="openLightbox( loop.index0 )">
                         </div>
                         {% endfor %}
                     {% else %}
@@ -53,7 +53,7 @@
                 <div class="col-auto">
                     <div class="ratio ratio-4x3 rounded-3 overflow-hidden border border-secondary border-opacity-50 cursor-pointer thumbnail-box shadow-sm" 
                          style="width: 80px;" 
-                         onclick="goToSlide({{ loop.index0 }})">
+                         onclick="goToSlide( loop.index0 )">
                         <img src="{{ url_for('static', filename='uploads/cars/' + img.filename) }}" 
                              class="w-100 h-100 object-fit-cover" alt="Thumbnail">
                     </div>
@@ -75,7 +75,7 @@
                 <h2 class="text-white fw-bold mb-2">{{ car.brand }} {{ car.model }}</h2>
                 <div class="d-flex align-items-baseline">
                     <h1 class="text-success fw-bold mb-0 me-2">{{ "{:,.0f}".format(car.price) | replace(",", " ") }}</h1>
-                    <span class="text-success fs-3 fw-bold">Евр.</span>
+                    <span class="text-success fs-3 fw-bold">ЕВР.</span>
                 </div>
                 <div class="text-white-50 mt-2 small">
                     <i class="bi bi-clock me-1"></i> Публикувана на: {{ car.created_at.strftime('%d.%m.%Y') }}
@@ -210,8 +210,8 @@
         {% for img in car.images %}
             "{{ url_for('static', filename='uploads/cars/' + img.filename) }}"{% if not loop.last %},{% endif %}
         {% endfor %}
-    ];
-    
+    ;]
+
     let currentImageIndex = 0;
 
     function openLightbox(index) {
