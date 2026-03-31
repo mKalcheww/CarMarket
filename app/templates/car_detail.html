@@ -23,7 +23,7 @@
                                  class="d-block w-100 object-fit-cover main-display-img cursor-zoom-in" 
                                  style="height: 500px;" 
                                  alt="Car Image"
-                                 onclick="openLightbox( loop.index0 )">
+                                 onclick="openLightbox({{ loop.index0 }})">
                         </div>
                         {% endfor %}
                     {% else %}
@@ -53,11 +53,11 @@
                 <div class="col-auto">
                     <div class="ratio ratio-4x3 rounded-3 overflow-hidden border border-secondary border-opacity-50 cursor-pointer thumbnail-box shadow-sm" 
                          style="width: 80px;" 
-                         onclick="goToSlide( loop.index0 )">
+                         onclick="goToSlide({{ loop.index0 }})">
                         <img src="{{ url_for('static', filename='uploads/cars/' + img.filename) }}" 
                              class="w-100 h-100 object-fit-cover" alt="Thumbnail">
                     </div>
-                </div>
+                </div>S
                 {% endfor %}
             </div>
             {% endif %}
@@ -210,14 +210,14 @@
         {% for img in car.images %}
             "{{ url_for('static', filename='uploads/cars/' + img.filename) }}"{% if not loop.last %},{% endif %}
         {% endfor %}
-    ;]
+    ];
 
     let currentImageIndex = 0;
 
     function openLightbox(index) {
         currentImageIndex = index;
         updateLightboxImage();
-        const modal = new bootstrap.Modal(document.getElementById('lightboxModal'));
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('lightboxModal'));
         modal.show();
     }
 
@@ -233,7 +233,7 @@
     }
 
     function goToSlide(index) {
-        const carousel = new bootstrap.Carousel(document.getElementById('carCarousel'));
+        const carousel = bootstrap.Carousel.getOrCreateInstance(document.getElementById('carCarousel'));
         carousel.to(index);
     }
 
