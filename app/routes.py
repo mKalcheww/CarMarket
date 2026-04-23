@@ -124,7 +124,6 @@ def add_car():
             fuel=form.fuel_type.data, # Провери дали името съвпада с модела ти
             mileage=form.mileage.data,
             transmission=form.transmission.data,
-            color=form.color.data,
             doors=form.doors.data,
             condition=form.condition.data,
             description=form.description.data,
@@ -218,66 +217,70 @@ def car_detail(id):
 def edit_car(id):
     car = Car.query.get_or_404(id)
     
-    # Сигурност: Само собственикът или админ може да редактира
     if car.user_id != current_user.id and not getattr(current_user, 'is_admin', False):
         flash('Нямате право да редактирате тази обява!', 'danger')
         return redirect(url_for('routes.index'))
 
-    # Прехвърляме данните от обекта Car към формата
     form = CarForm(obj=car)
-    
-    # Ръчно задаваме choices за модела, за да не гърми валидацията
     form.model.choices = [(m, m) for m in CAR_BRANDS.get(car.brand, [])]
 
     if form.validate_on_submit():
-        # Обновяваме полетата на съществуващия обект
+        # --- НОВО: ОБРАБОТКА НА СНИМКИТЕ ПРИ ЗАПАЗВАНЕ ---
+        
+        # 1. Изтриване на маркираните снимки
+        deleted_ids_str = request.form.get('deleted_image_ids')
+        if deleted_ids_str:
+            # Превръщаме текста "5,8" в списък от числа [5, 8]
+            deleted_ids = [int(img_id) for img_id in deleted_ids_str.split(',') if img_id.strip().isdigit()]
+            for img_id in deleted_ids:
+                img_to_delete = CarImage.query.get(img_id)
+                # Проверяваме дали снимката съществува и дали наистина принадлежи на тази кола (защита)
+                if img_to_delete and img_to_delete.car_id == car.id:
+                    # Трием файла от папката
+                    file_path = os.path.join(current_app.root_path, 'static/uploads/cars', img_to_delete.filename)
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                    # Трием от базата
+                    db.session.delete(img_to_delete)
+
+        # 2. Задаване на нова главна снимка
+        main_image_id_str = request.form.get('main_image_id')
+        if main_image_id_str and main_image_id_str.isdigit():
+            main_image_id = int(main_image_id_str)
+            img_to_make_main = CarImage.query.get(main_image_id)
+            # Проверяваме дали избраната снимка е на тази кола
+            if img_to_make_main and img_to_make_main.car_id == car.id:
+                # Махаме флага 'is_main' от всички снимки на колата
+                CarImage.query.filter_by(car_id=car.id).update({'is_main': False})
+                # Задаваме го само на новата
+                img_to_make_main.is_main = True
+                
+        # --- КРАЙ НА НОВАТА ОБРАБОТКА ---
+
+        # Обновяваме останалите текстови полета
         car.brand = form.brand.data
         car.model = form.model.data
         car.year = form.year.data
         car.price = form.price.data
         car.horsepower = form.horsepower.data
         car.engine_size = form.engine_size.data
-        car.fuel_type = form.fuel_type.data
+        car.fuel = form.fuel_type.data
         car.mileage = form.mileage.data
         car.transmission = form.transmission.data
-        car.color = form.color.data
         car.doors = form.doors.data
         car.condition = form.condition.data
         car.description = form.description.data
         
+        # Запазваме всичко (и текстовете, и промените по снимките) накуп!
         db.session.commit()
         flash('Обявата беше обновена успешно!', 'success')
         return redirect(url_for('routes.car_detail', id=car.id))
     
-    # Попълваме fuel_type ръчно, ако имената в модела и формата се различават (fuel vs fuel_type)
     if request.method == 'GET':
-        form.fuel_type.data = car.fuel # Ако в модела ти се казва 'fuel'
+        form.fuel_type.data = car.fuel 
 
     return render_template('edit_car.html', form=form, car=car)
 
-@bp.route('/delete_image/<int:image_id>', methods=['POST'])
-@login_required
-def delete_image(image_id):
-    image = CarImage.query.get_or_404(image_id)
-    car = Car.query.get(image.car_id)
-    
-    # Проверка за права
-    if car.user_id != current_user.id and not getattr(current_user, 'is_admin', False):
-        return jsonify({'error': 'Unauthorized'}), 403
-
-    try:
-        # Изтриване на файла от диска
-        file_path = os.path.join(current_app.root_path, 'static/uploads/cars', image.filename)
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        
-        # Изтриване от базата данни
-        db.session.delete(image)
-        db.session.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    
 # 2. Логика за изтриване
 @bp.route('/delete_car/<int:id>') # Махнахме POST за по-лесно връзване с линк бутон
 @login_required
@@ -324,7 +327,7 @@ def search():
     if form.max_year.data:
         query = query.filter(Car.year <= int(form.max_year.data))
     if form.fuel_type.data:
-        query = query.filter(Car.fuel_type == form.fuel_type.data)
+        query = query.filter(Car.fuel == form.fuel_type.data)
     if form.transmission.data:
         query = query.filter(Car.transmission == form.transmission.data)
     if form.condition.data:

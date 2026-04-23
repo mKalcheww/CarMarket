@@ -31,7 +31,6 @@ class CarForm(FlaskForm):
     fuel_type = SelectField('Гориво', choices=[('Бензин', 'Бензин'), ('Дизел', 'Дизел'), ('Електрически', 'Електрически'), ('Хибрид', 'Хибрид')], validators=[DataRequired()])
     mileage = IntegerField('Пробег (км)', validators=[DataRequired()])
     transmission = SelectField('Скоростна кутия', choices=[('Ръчна', 'Ръчна'), ('Автоматична', 'Автоматична')], validators=[DataRequired()])
-    color = StringField('Цвят', validators=[DataRequired()])
     doors = SelectField('Брой врати', choices=[('2/3', '2/3'), ('4/5', '4/5')], validators=[DataRequired()])
     condition = SelectField('Състояние', choices=[('Нова', 'Нова'), ('Употребявана', 'Употребявана')], validators=[DataRequired()])
     description = TextAreaField('Описание')

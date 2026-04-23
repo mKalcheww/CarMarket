@@ -2,89 +2,112 @@
 {% block title %}Редактирай обява – CarMarket{% endblock %}
 
 {% block content %}
-<div class="container py-5 min-vh-100">
+<div class="container py-5 min-vh-100 search-page-wrapper">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <h1 class="display-5 fw-bold text-center mb-5 text-success">Редактирай обява</h1>
+            
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-black text-white mb-2" style="letter-spacing: -1px;">Редактирай <span class="text-neon">Обява</span></h1>
+                <p class="text-white-50 lead">Промени данните на твоя автомобил или добави нови снимки.</p>
+            </div>
 
-            <div class="card shadow-lg border-0 rounded-4 bg-dark text-light">
-                <div class="card-body p-5">
+            <div class="card glass-card border-0 rounded-4 mb-5 position-relative overflow-hidden">
+                <div class="glass-glow"></div>
+                <div class="card-body p-4 p-md-5 position-relative z-1">
+                    
                     <form method="POST" enctype="multipart/form-data" id="carForm" novalidate>
                         {{ form.hidden_tag() }}
+                        <input type="hidden" name="deleted_image_ids" id="deleted_image_ids" value="">
+                        <input type="hidden" name="main_image_id" id="main_image_id" value="">
 
-                        <div class="row g-4">
+                        <h5 class="text-neon fw-bold mb-4 border-bottom border-secondary pb-2"><i class="bi bi-info-circle me-2"></i>Основни данни</h5>
+                        <div class="row g-4 mb-5">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold text-success">Марка</label>
-                                {{ form.brand(class="form-select border-secondary bg-dark text-white shadow-sm", id="brand-select") }}
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-car-front-fill text-neon me-2"></i>Марка</label>
+                                {{ form.brand(class="form-select form-select-lg custom-input", id="brand-select") }}
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold text-success">Модел</label>
-                                {{ form.model(class="form-select border-secondary bg-dark text-white shadow-sm", id="model-select") }}
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-tags-fill text-neon me-2"></i>Модел</label>
+                                {{ form.model(class="form-select form-select-lg custom-input", id="model-select") }}
                             </div>
-
                             <div class="col-md-4">
-                                <label class="form-label fw-bold text-success">Година</label>
-                                {{ form.year(class="form-select border-secondary bg-dark text-white shadow-sm") }}
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-calendar-event text-neon me-2"></i>Година</label>
+                                {{ form.year(class="form-select form-select-lg custom-input") }}
                             </div>
                             <div class="col-md-8">
-                                <label class="form-label fw-bold text-success">Цена (€)</label>
-                                <div class="input-group">
-                                    {{ form.price(class="form-control border-secondary bg-dark text-white shadow-sm") }}
-                                    <span class="input-group-text bg-success text-white border-0">€</span>
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-currency-euro text-neon me-2"></i>Цена</label>
+                                <div class="input-group input-group-lg custom-input-group shadow-sm rounded-3">
+                                    {{ form.price(class="form-control custom-input border-end-0") }}
+                                    <span class="input-group-text bg-neon text-dark fw-bold border-0 px-4">€</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="text-neon fw-bold mb-4 border-bottom border-secondary pb-2"><i class="bi bi-gear-wide-connected me-2"></i>Технически детайли</h5>
+                        <div class="row g-4 mb-5">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-fuel-pump-fill text-neon me-2"></i>Гориво</label>
+                                {{ form.fuel_type(class="form-select form-select-lg custom-input") }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-joystick text-neon me-2"></i>Скорости</label>
+                                {{ form.transmission(class="form-select form-select-lg custom-input") }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-speedometer2 text-neon me-2"></i>Пробег (км)</label>
+                                {{ form.mileage(class="form-control form-control-lg custom-input") }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-pencil-square text-neon me-2"></i>Описание</label>
+                                {{ form.description(class="form-control custom-input", rows="5") }}
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-4 p-4 rounded-4 bg-darker border border-secondary border-opacity-25">
+                            <div class="d-flex align-items-center mb-4">
+                                <i class="bi bi-images text-neon fs-3 me-3"></i>
+                                <div>
+                                    <h5 class="fw-bold text-white mb-0">Управление на снимки</h5>
+                                    <small class="text-white-50">Избери главна снимка или изтрий ненужните</small>
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold text-success">Гориво</label>
-                                {{ form.fuel_type(class="form-select border-secondary bg-dark text-white shadow-sm") }}
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold text-success">Скорости</label>
-                                {{ form.transmission(class="form-select border-secondary bg-dark text-white shadow-sm") }}
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold text-success">Пробег</label>
-                                {{ form.mileage(class="form-control border-secondary bg-dark text-white shadow-sm") }}
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label fw-bold text-success">Описание</label>
-                                {{ form.description(class="form-control border-secondary bg-dark text-white shadow-sm", rows="4") }}
-                            </div>
-
-                            <div class="col-12 mt-5">
-                                <h4 class="text-success mb-4 border-bottom border-success pb-2">Управление на снимки</h4>
-                                
-                                <div id="existing-photos" class="row g-3 mb-4">
-                                    {% for img in car.images %}
-                                    <div class="col-md-3 col-6 position-relative" id="img-container-{{ img.id }}">
-                                        <div class="preview-card border border-secondary rounded-3 overflow-hidden">
-                                            <img src="{{ url_for('static', filename='uploads/cars/' + img.filename) }}" class="img-fluid" style="height: 150px; width: 100%; object-fit: cover;">
-                                            <button type="button" 
-                                                    onclick="deleteImage( img.id )" 
-                                                    class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 shadow">
-                                                <i class="bi bi-trash"></i>
+                            <div id="existing-photos" class="row g-3 mb-4">
+                                {% for img in car.images %}
+                                <div class="col-md-3 col-6" id="img-container-{{ img.id }}">
+                                    <div class="preview-card border-neon-soft rounded-3 overflow-hidden position-relative">
+                                        <img src="{{ url_for('static', filename='uploads/cars/' + img.filename) }}" class="preview-img">
+                                        
+                                        <div class="action-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center gap-2 opacity-0 transition-300">
+                                            <button type="button" onclick="setMainImage({{ img.id }})" class="btn btn-warning btn-sm rounded-circle p-2 shadow" title="Направи главна">
+                                                <i class="bi bi-star-fill"></i>
                                             </button>
-                                            {% if img.is_main %}
-                                            <div class="bg-success text-white text-center py-1 small fw-bold">Главна</div>
-                                            {% endif %}
+                                            <button type="button" onclick="deleteImage({{ img.id }})" class="btn btn-danger btn-sm rounded-circle p-2 shadow" title="Изтрий">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </div>
+
+                                        <div id="badge-{{ img.id }}" class="bg-neon text-dark text-center py-1 small fw-bold main-badge position-absolute bottom-0 w-100" style="{% if not img.is_main %}display: none;{% endif %}">
+                                            ГЛАВНА СНИМКА
                                         </div>
                                     </div>
-                                    {% endfor %}
                                 </div>
-
-                                <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
-                                <div id="dropZone" class="border border-2 border-dashed border-success rounded-4 p-5 text-center" style="cursor: pointer; background: rgba(25, 135, 84, 0.05);">
-                                    <i class="bi bi-cloud-upload fs-1 text-success"></i>
-                                    <p class="mt-2 fw-bold text-success">Кликни или пусни нови снимки тук</p>
-                                </div>
-                                <div id="preview" class="row mt-4 g-3"></div>
+                                {% endfor %}
                             </div>
 
-                            <div class="col-12 text-center mt-5">
-                                <button type="submit" class="btn btn-success btn-lg px-5 shadow">Запази промените</button>
-                                <a href="{{ url_for('routes.my_cars') }}" class="btn btn-outline-light btn-lg px-4 ms-2">Отказ</a>
+                            <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+                            <div id="dropZone" class="custom-dropzone rounded-4 p-5 text-center mt-3">
+                                <div class="dropzone-content">
+                                    <i class="bi bi-plus-circle text-neon display-6 mb-2 d-block"></i>
+                                    <h6 class="fw-bold text-white">Добави още снимки</h6>
+                                    <p class="text-muted small mb-0">Кликни тук или плъзни файлове</p>
+                                </div>
                             </div>
+                        </div>
+
+                        <div class="col-12 text-center mt-5 d-flex flex-column flex-md-row justify-content-center gap-3">
+                            <button type="submit" class="btn btn-neon btn-lg px-5 py-3 fw-bold text-uppercase shadow-neon">Запази промените</button>
+                            <a href="{{ url_for('routes.my_cars') }}" class="btn btn-outline-light btn-lg px-5 py-3 fw-bold text-uppercase">Отказ</a>
                         </div>
                     </form>
                 </div>
@@ -93,56 +116,134 @@
     </div>
 </div>
 
-<script>
-const carId =  car.id;
-
-// Функция за ИЗТРИВАНЕ
-async function deleteImage(imgId) {
-    if (!confirm('Сигурни ли сте, че искате да изтриете тази снимка?')) return;
+<style>
+    /* Глобални стилове */
+    body { background-color: #050505 !important; color: #e0e0e0 !important; font-family: 'Inter', sans-serif; }
+    .text-neon { color: #00ff85 !important; }
+    .bg-neon { background-color: #00ff85 !important; }
+    .bg-darker { background-color: rgba(10, 12, 16, 0.6) !important; }
+    .transition-300 { transition: all 0.3s ease; }
     
-    try {
-        const response = await fetch(`/delete_image/${imgId}`, { method: 'POST' });
-        if (response.ok) {
-            document.getElementById(`img-container-${imgId}`).remove();
-        } else {
-            alert('Грешка при изтриването.');
-        }
-    } catch (err) {
-        console.error(err);
+    /* Glassmorphism */
+    .glass-card {
+        background: rgba(22, 27, 34, 0.6) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    
+    .glass-glow {
+        position: absolute;
+        top: -50px; left: 50%;
+        transform: translateX(-50%);
+        width: 60%; height: 100px;
+        background: #00ff85;
+        filter: blur(80px);
+        opacity: 0.12;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    /* Инпути */
+    .custom-input { 
+        background-color: rgba(13, 17, 23, 0.8) !important; 
+        border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+        color: #fff !important; 
+        border-radius: 8px !important;
+        transition: all 0.3s ease;
+    }
+
+    .custom-input:focus { 
+        border-color: #00ff85 !important; 
+        box-shadow: 0 0 15px rgba(0, 255, 133, 0.1) !important;
+    }
+
+    /* Управление на снимки */
+    .preview-card {
+        background: #000;
+        border: 1px solid rgba(0, 255, 133, 0.1) !important;
+        height: 150px;
+    }
+    .preview-img { height: 100%; width: 100%; object-fit: cover; }
+    
+    .preview-card:hover .action-overlay { opacity: 1 !important; background: rgba(0,0,0,0.4); }
+    
+    .custom-dropzone {
+        border: 2px dashed rgba(0, 255, 133, 0.3);
+        background: rgba(0, 255, 133, 0.02);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .custom-dropzone:hover {
+        background: rgba(0, 255, 133, 0.08);
+        border-color: #00ff85;
+    }
+
+    /* Бутони */
+    .btn-neon { 
+        background: #00ff85 !important; 
+        color: #050505 !important;
+        border: none !important;
+    }
+    .btn-neon:hover { 
+        background: #00e677 !important; 
+        box-shadow: 0 0 20px rgba(0, 255, 133, 0.3);
+        transform: translateY(-2px);
+    }
+    .shadow-neon { box-shadow: 0 0 15px rgba(0, 255, 133, 0.2); }
+    
+    .border-neon-soft { border: 1px solid rgba(0, 255, 133, 0.2) !important; }
+</style>
+
+<script>
+const carId = {{ car.id }};
+let deletedImages = [];
+
+// Функция за маркиране на изтриване
+function deleteImage(imgId) {
+    const container = document.getElementById(`img-container-${imgId}`);
+    container.classList.add('opacity-0');
+    setTimeout(() => { container.style.display = 'none'; }, 300);
+    
+    deletedImages.push(imgId);
+    document.getElementById('deleted_image_ids').value = deletedImages.join(',');
+}
+
+// Функция за маркиране на главна снимка
+function setMainImage(imgId) {
+    document.getElementById('main_image_id').value = imgId;
+
+    document.querySelectorAll('.main-badge').forEach(badge => {
+        badge.style.display = 'none';
+    });
+    
+    const badge = document.getElementById(`badge-${imgId}`);
+    if (badge) {
+        badge.style.display = 'block';
     }
 }
 
-// Логика за добавяне на нови снимки (същата, но със зелени превюта)
+// Качване на нови снимки (AJAX)
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 
 async function uploadFiles(files) {
+    let uploaded = false;
     for (const file of files) {
         const formData = new FormData();
         formData.append('file', file);
         const resp = await fetch(`/upload_image/${carId}`, { method: 'POST', body: formData });
         if (resp.ok) {
-            const res = await resp.json();
-            const div = document.createElement('div');
-            div.className = 'col-md-3 col-6';
-            div.innerHTML = `
-                <div class="preview-card border border-success rounded-3 overflow-hidden">
-                    <img src="${res.url}" class="img-fluid" style="height: 150px; width: 100%; object-fit: cover;">
-                    <div class="bg-success text-white text-center py-1 small">Току-що качена</div>
-                </div>`;
-            document.getElementById('preview').appendChild(div);
+            uploaded = true;
         }
+    }
+    
+    if (uploaded) {
+        location.reload(); 
     }
 }
 
 dropZone.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', (e) => uploadFiles(e.target.files));
 </script>
-
-<style>
-    .border-dashed { border-style: dashed !important; }
-    .form-control:focus, .form-select:focus { border-color: #198754; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25); }
-    .preview-card { transition: transform 0.2s; }
-    .preview-card:hover { transform: scale(1.02); }
-</style>
 {% endblock %}

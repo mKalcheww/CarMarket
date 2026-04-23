@@ -1,54 +1,76 @@
 {% extends "base.html" %}
-{% block title %}Вход{% endblock %}
+{% block title %}Вход - CarMarket{% endblock %}
 
 {% block content %}
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-    <div class="card bg-dark border-secondary border-opacity-25 rounded-4 shadow-lg p-4" style="width: 100%; max-width: 400px; backdrop-filter: blur(10px);">
-        <h2 class="text-center fw-bold text-success mb-4">Вход в системата</h2>
+<div class="container d-flex justify-content-center align-items-center py-5 position-relative" style="min-height: 85vh;">
+    <div class="glass-glow position-absolute top-50 start-50 translate-middle" style="width: 300px; height: 300px; filter: blur(100px);"></div>
+    
+    <div class="card glass-card border-0 rounded-4 p-4 p-md-5 position-relative z-1 shadow-lg" style="width: 100%; max-width: 450px;">
+        
+        <div class="text-center mb-5">
+            <div class="bg-neon rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-neon" style="width: 65px; height: 65px;">
+                <i class="bi bi-box-arrow-in-right fs-1 text-dark" style="margin-left: 5px;"></i>
+            </div>
+            <h2 class="fw-black text-white mb-1" style="letter-spacing: -1px;">Добре дошли отново</h2>
+            <p class="text-white-50 small">Влезте във вашия акаунт</p>
+        </div>
+        
         <form method="POST">
             {{ form.hidden_tag() }}
-            <div class="mb-3 text-start">
-                <label class="form-label text-success fw-bold small ms-1">{{ form.username.label }}</label>
-                {{ form.username(class="form-control custom-input shadow-none", placeholder="Потребителско име") }}
-            </div>
+            
             <div class="mb-4 text-start">
-                <label class="form-label text-success fw-bold small ms-1">{{ form.password.label }}</label>
-                {{ form.password(class="form-control custom-input shadow-none", placeholder="******") }}
+                <label class="form-label text-neon fw-bold small text-uppercase tracking-wide"><i class="bi bi-person-fill me-2"></i>Потребител</label>
+                {{ form.username(class="form-control form-control-lg custom-input", placeholder="Въведете потребителско име") }}
             </div>
-            <div class="d-grid">
-                {{ form.submit(class="btn btn-success rounded-pill fw-bold py-2 shadow") }}
+            
+            <div class="mb-5 text-start">
+                <label class="form-label text-neon fw-bold small text-uppercase tracking-wide"><i class="bi bi-shield-lock-fill me-2"></i>Парола</label>
+                {{ form.password(class="form-control form-control-lg custom-input", placeholder="••••••••") }}
             </div>
-            <p class="text-center mt-3 text-white-50 small">
-                Нямаш акаунт? <a href="{{ url_for('routes.register') }}" class="text-success text-decoration-none fw-bold border-bottom border-success border-opacity-25">Регистрирай се</a>
+            
+            <div class="d-grid mb-4">
+                {{ form.submit(class="btn btn-neon btn-animated rounded-pill py-3 text-uppercase shadow-neon", style="background-color: #00ff85 !important; color: #000000 !important; font-weight: 900 !important; border: none;") }}
+            </div>
+            
+            <p class="text-center m-0 text-white-50 small">
+                Нямаш акаунт? <a href="{{ url_for('routes.register') }}" class="text-neon text-decoration-none fw-bold hover-neon-link ms-1">Регистрирай се тук</a>
             </p>
         </form>
     </div>
 </div>
 
 <style>
-    /* ПЪЛЕН КОНТРОЛ ВЪРХУ ИНПУТИТЕ */
-    .custom-input {
-        background-color: #0d1117 !important;
-        border: 1px solid #30363d !important;
-        color: #ffffff !important;
-        padding: 0.75rem 1rem;
+    .glass-card {
+        background: rgba(22, 27, 34, 0.6) !important;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
 
-    .custom-input::placeholder {
-        color: rgba(255, 255, 255, 0.3) !important;
+    .custom-input {
+        background-color: rgba(13, 17, 23, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
     }
+
+    .custom-input::placeholder { color: rgba(255, 255, 255, 0.2) !important; }
 
     .custom-input:focus {
         border-color: #00ff85 !important;
         background-color: #0d1117 !important;
-        box-shadow: 0 0 0 0.25rem rgba(0, 255, 133, 0.1) !important;
-        color: white !important;
+        box-shadow: 0 0 15px rgba(0, 255, 133, 0.15) !important;
     }
 
-    /* ФИКС ЗА ЖЪЛТОТО/БЯЛОТО АВТОМАТИЧНО ПОПЪЛВАНЕ */
-    input:-webkit-autofill,
-    input:-webkit-autofill:hover, 
-    input:-webkit-autofill:focus {
+    .hover-neon-link { position: relative; transition: 0.3s; }
+    .hover-neon-link:hover { text-shadow: 0 0 10px rgba(0, 255, 133, 0.8); }
+    
+    .tracking-wide { letter-spacing: 0.5px; }
+
+    /* Фикс за Auto-fill от браузъра */
+    input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus {
         -webkit-text-fill-color: #ffffff !important;
         -webkit-box-shadow: 0 0 0px 1000px #0d1117 inset !important;
         transition: background-color 5000s ease-in-out 0s;

@@ -1,117 +1,239 @@
 {% extends "base.html" %}
-
-{% block title %}Моите обяви{% endblock %}
+{% block title %}Моите обяви – CarMarket{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-end mb-5">
-        <div>
-            <h2 class="fw-bold text-white mb-1">Моите <span class="text-success">Обяви</span></h2>
-            <p class="text-white-50 m-0">Управлявайте вашите активни предложения</p>
+<div class="container py-5 min-vh-100 search-page-wrapper">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-5 position-relative z-1">
+        <div class="mb-4 mb-md-0">
+            <h1 class="display-4 fw-black text-white mb-2" style="letter-spacing: -1px;">Моите <span class="text-neon">Обяви</span></h1>
+            <p class="text-white-50 lead m-0">Управлявай своите активни предложения бързо и лесно.</p>
         </div>
-        <div class="text-end">
-            <a href="{{ url_for('routes.add_car') }}" class="btn btn-success rounded-pill fw-bold px-4 shadow-lg">
-                <i class="bi bi-plus-lg me-2"></i>Нова обява
+        <div class="text-md-end">
+            <a href="{{ url_for('routes.add_car') }}" class="btn btn-neon btn-animated rounded-pill fw-bold px-5 py-3 shadow-lg d-inline-flex align-items-center">
+                <i class="bi bi-plus-circle-fill fs-5 me-2"></i>НОВА ОБЯВА
             </a>
         </div>
     </div>
 
     {% if cars %}
-    <div class="row g-4">
+    <div class="row g-4 position-relative z-1">
         {% for car in cars %}
         <div class="col-12">
-            <div class="card bg-dark border-secondary border-opacity-25 rounded-4 overflow-hidden shadow-lg hover-row">
-                <div class="row g-0">
-                    <div class="col-md-3">
-                        <div class="ratio ratio-4x3 h-100">
-                            {% if car.images %}
-                                {% set main_img = car.images|selectattr("is_main")|first or car.images[0] %}
-                                <img src="{{ url_for('static', filename='uploads/cars/' + main_img.filename) }}" class="object-fit-cover" alt="{{ car.brand }}">
-                            {% else %}
-                                <div class="bg-dark d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-camera text-secondary fs-1"></i>
-                                </div>
+            <div class="card glass-card border-0 rounded-4 overflow-hidden car-horizontal-card">
+                <div class="row g-0 h-100 align-items-stretch">
+                    
+                    <div class="col-md-4 col-lg-3 img-wrapper position-relative">
+                        {% set ns = namespace(main_img=none) %}
+                        {% for img in car.images %}
+                            {% if img.is_main %}
+                                {% set ns.main_img = img %}
                             {% endif %}
-                        </div>
+                        {% endfor %}
+                        
+                        {% if not ns.main_img and car.images %}
+                            {% set ns.main_img = car.images[0] %}
+                        {% endif %}
+
+                        {% if ns.main_img %}
+                            <img src="{{ url_for('static', filename='uploads/cars/' + ns.main_img.filename) }}" class="car-img h-100 w-100 object-fit-cover" alt="{{ car.brand }}">
+                        {% else %}
+                            <img src="https://via.placeholder.com/400x300/161b22/ffffff?text=No+Image" class="car-img h-100 w-100 object-fit-cover" alt="No image">
+                        {% endif %}
+                        <div class="img-overlay-horizontal"></div>
                     </div>
                     
-                    <div class="col-md-6 p-4">
-                        <div class="d-flex flex-column h-100">
-                            <div>
-                                <h4 class="text-white fw-bold mb-1">{{ car.brand }} {{ car.model }}</h4>
-                                <div class="text-success fs-3 fw-bold mb-3">{{ "{:,.0f}".format(car.price) | replace(",", " ") }} лв.</div>
+                    <div class="col-md-5 col-lg-6 p-4 d-flex flex-column justify-content-center">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-neon text-dark fw-bold rounded-pill px-3 py-1 me-3">
+                                <i class="bi bi-check2-circle me-1"></i>Активна
+                            </span>
+                        </div>
+                        <h4 class="text-white fw-bold mb-1">{{ car.brand }} {{ car.model }}</h4>
+                        <div class="text-neon fs-3 fw-black mb-4">{{ "{:,.0f}".format(car.price) | replace(",", " ") }} €</div>
+                        
+                        <div class="car-info-grid">
+                            <div class="info-badge">
+                                <i class="bi bi-calendar-event text-neon me-2"></i>{{ car.year }} г.
                             </div>
-                            
-                            <div class="row g-2 text-white-50 small mb-auto">
-                                <div class="col-6"><i class="bi bi-calendar3 text-success me-2"></i>{{ car.year }} г.</div>
-                                <div class="col-6"><i class="bi bi-speedometer2 text-success me-2"></i>{{ "{:,.0f}".format(car.mileage) | replace(",", " ") }} км</div>
-                                <div class="col-6"><i class="bi bi-geo-alt text-success me-2"></i>{{ car.location }}</div>
-                                <div class="col-6"><i class="bi bi-fuel-pump text-success me-2"></i>{{ car.fuel }}</div>
+                            <div class="info-badge">
+                                <i class="bi bi-speedometer2 text-neon me-2"></i>{{ "{:,.0f}".format(car.mileage) | replace(",", " ") }} км
                             </div>
-
-                            <div class="mt-3">
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill">
-                                    Активна обява
-                                </span>
+                            <div class="info-badge">
+                                <i class="bi bi-fuel-pump text-neon me-2"></i>{{ car.fuel }}
+                            </div>
+                            <div class="info-badge">
+                                <i class="bi bi-gear-wide-connected text-neon me-2"></i>{{ car.horsepower }} к.с.
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-md-3 p-4 border-start border-secondary border-opacity-25 bg-black bg-opacity-20">
-                        <div class="d-flex flex-md-column justify-content-center gap-2 h-100">
-                            <a href="{{ url_for('routes.car_detail', id=car.id) }}" class="btn btn-outline-light rounded-pill w-100 fw-bold py-2">
-                                <i class="bi bi-eye me-2"></i>Преглед
-                            </a>
-                            
-                            <a href="{{ url_for('routes.edit_car', id=car.id) }}" class="btn btn-outline-secondary rounded-pill w-100 fw-bold py-2">
-                                <i class="bi bi-pencil me-2"></i>Редактирай
-                            </a>
-                            
-                            <a href="{{ url_for('routes.delete_car', id=car.id) }}" 
-                               class="btn btn-outline-danger rounded-pill w-100 fw-bold py-2"
-                               onclick="return confirm('Сигурни ли сте, че искате да изтриете тази обява?');">
-                                <i class="bi bi-trash3 me-2"></i>Изтрий
-                            </a>
-                        </div>
+                    <div class="col-md-3 p-4 border-start border-secondary border-opacity-25 bg-darker d-flex flex-column justify-content-center gap-3">
+                        <a href="{{ url_for('routes.car_detail', id=car.id) }}" class="btn btn-outline-light rounded-pill w-100 fw-bold py-2 custom-btn-hover">
+                            <i class="bi bi-eye me-2"></i>Преглед
+                        </a>
+                        
+                        <a href="{{ url_for('routes.edit_car', id=car.id) }}" class="btn btn-outline-neon rounded-pill w-100 fw-bold py-2 custom-btn-hover">
+                            <i class="bi bi-pencil-square me-2"></i>Редактирай
+                        </a>
+                        
+                        <a href="{{ url_for('routes.delete_car', id=car.id) }}" 
+                           class="btn btn-outline-danger rounded-pill w-100 fw-bold py-2 custom-delete-btn"
+                           onclick="return confirm('Сигурни ли сте, че искате да изтриете тази обява завинаги? Това действие не може да бъде върнато назад.');">
+                            <i class="bi bi-trash3 me-2"></i>Изтрий
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
+
     {% else %}
-    <div class="text-center py-5 px-4 rounded-5 border border-secondary border-opacity-25 bg-dark bg-opacity-50 shadow-lg">
-        <div class="mb-4">
-            <div class="bg-dark d-inline-flex align-items-center justify-content-center rounded-circle border border-secondary border-opacity-50" style="width: 120px; height: 120px;">
-                <i class="bi bi-car-front text-success" style="font-size: 3.5rem;"></i>
-            </div>
+    <div class="text-center py-5 px-4 rounded-4 glass-card mt-4 position-relative z-1">
+        <div class="empty-state-icon mb-4 mt-3">
+            <i class="bi bi-car-front display-1 text-white-50"></i>
         </div>
         <h2 class="text-white fw-bold">Все още нямате обяви</h2>
-        <p class="text-white-50 mb-5 mx-auto" style="max-width: 500px;">
+        <p class="text-white-50 mb-5 mx-auto lead" style="max-width: 600px;">
             Продайте своя автомобил бързо и лесно. Хиляди потенциални купувачи ви очакват в CarMarket.
         </p>
-        <a href="{{ url_for('routes.add_car') }}" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-lg text-dark">
+        <a href="{{ url_for('routes.add_car') }}" class="btn btn-neon btn-animated btn-lg rounded-pill px-5 py-3 fw-bold text-dark mb-3">
             Публикувай първата си обява
         </a>
     </div>
     {% endif %}
+    
+    <div class="glass-glow bg-center"></div>
 </div>
 
 <style>
-    .hover-row {
-        transition: transform 0.3s ease, border-color 0.3s ease;
+    /* Глобални цветове */
+    body { background-color: #050505 !important; color: #e0e0e0 !important; font-family: 'Inter', 'Segoe UI', sans-serif; }
+    .text-neon { color: #00ff85 !important; }
+    .bg-neon { background-color: #00ff85 !important; }
+    .bg-darker { background-color: rgba(10, 12, 16, 0.6) !important; }
+    
+    /* Стъклен ефект */
+    .glass-card {
+        background: rgba(22, 27, 34, 0.6) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }
-    .hover-row:hover {
-        transform: scale(1.01);
-        border-color: rgba(0, 255, 133, 0.4) !important;
+    
+    .glass-glow.bg-center {
+        position: fixed;
+        top: 30%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 50vw; height: 50vh;
+        background: #00ff85;
+        filter: blur(150px);
+        opacity: 0.05;
+        z-index: 0;
+        pointer-events: none;
     }
-    .badge {
-        font-size: 0.75rem;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
+
+    /* Хоризонтални карти */
+    .car-horizontal-card {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .object-fit-cover {
-        object-fit: cover;
+    .car-horizontal-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 255, 133, 0.15);
+        border-color: rgba(0, 255, 133, 0.3) !important;
+    }
+
+    /* Снимки и Zoom ефект */
+    .img-wrapper { overflow: hidden; }
+    .car-img { transition: transform 0.6s ease; min-height: 250px; }
+    .car-horizontal-card:hover .car-img { transform: scale(1.08); }
+    
+    .img-overlay-horizontal {
+        position: absolute;
+        top: 0; bottom: 0; right: 0;
+        width: 30%;
+        background: linear-gradient(to right, rgba(22, 27, 34, 0) 0%, rgba(22, 27, 34, 0.6) 100%);
+        pointer-events: none;
+    }
+
+    /* Баджове за характеристики */
+    .car-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    .info-badge {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: #b0b3b8;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Бутони */
+    .btn-neon { 
+        background: #00ff85 !important; 
+        color: #050505 !important;
+        border: none !important;
+        transition: all 0.3s ease;
+    }
+    .btn-neon:hover { 
+        background: #00e677 !important; 
+        box-shadow: 0 0 25px rgba(0, 255, 133, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .btn-animated { animation: pulse-neon 2s infinite; }
+
+    @keyframes pulse-neon {
+        0% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0.4); }
+        70% { box-shadow: 0 0 0 15px rgba(0, 255, 133, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0); }
+    }
+
+    .btn-outline-neon { 
+        border: 2px solid #00ff85 !important; 
+        color: #00ff85 !important; 
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+    .btn-outline-neon:hover { 
+        background: #00ff85 !important; 
+        color: #050505 !important; 
+        box-shadow: 0 0 15px rgba(0, 255, 133, 0.3);
+    }
+
+    .custom-btn-hover:hover { transform: translateY(-2px); }
+
+    .custom-delete-btn {
+        border: 2px solid #dc3545 !important;
+        color: #dc3545 !important;
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+    .custom-delete-btn:hover {
+        background: #dc3545 !important;
+        color: #fff !important;
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    /* Empty state */
+    .empty-state-icon i {
+        animation: float 3s ease-in-out infinite;
+        display: inline-block;
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-15px); }
+        100% { transform: translateY(0px); }
     }
 </style>
 {% endblock %}
