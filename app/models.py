@@ -21,7 +21,7 @@ class Car(db.Model):
     mileage = db.Column(db.Integer, nullable=False)  # пробег в км
     engine_size = db.Column(db.Integer, nullable=False)  # кубатура в ccm
     transmission = db.Column(db.String(20), nullable=False)  # Ръчна / Автоматична
-    color = db.Column(db.String(30), nullable=False)
+    color = db.Column(db.String(30), nullable=True)
     euro_standard = db.Column(db.String(10))  # Euro 1–6, не е задължително
     doors = db.Column(db.Integer, nullable=False)  # 2/3, 4/5
     condition = db.Column(db.String(20), nullable=False, default="Употребявана")  # Нова, Употребявана, За части

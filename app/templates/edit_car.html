@@ -43,22 +43,42 @@
                             </div>
                         </div>
 
-                        <h5 class="text-neon fw-bold mb-4 border-bottom border-secondary pb-2"><i class="bi bi-gear-wide-connected me-2"></i>Технически детайли</h5>
+                        <h5 class="text-neon fw-bold mb-4 border-bottom border-secondary pb-2"><i class="bi bi-gear-wide-connected me-2"></i>Технически характеристики</h5>
                         <div class="row g-4 mb-5">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-lightning-charge-fill text-neon me-2"></i>Конски сили</label>
+                                {{ form.horsepower(class="form-control form-control-lg custom-input") }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-gear-fill text-neon me-2"></i>Кубатура (cm³)</label>
+                                {{ form.engine_size(class="form-control form-control-lg custom-input") }}
+                            </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-fuel-pump-fill text-neon me-2"></i>Гориво</label>
                                 {{ form.fuel_type(class="form-select form-select-lg custom-input") }}
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-joystick text-neon me-2"></i>Скорости</label>
-                                {{ form.transmission(class="form-select form-select-lg custom-input") }}
-                            </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-speedometer2 text-neon me-2"></i>Пробег (км)</label>
                                 {{ form.mileage(class="form-control form-control-lg custom-input") }}
                             </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-joystick text-neon me-2"></i>Скоростна кутия</label>
+                                {{ form.transmission(class="form-select form-select-lg custom-input") }}
+                            </div>
+                        </div>
+
+                        <h5 class="text-neon fw-bold mb-4 border-bottom border-secondary pb-2"><i class="bi bi-card-text me-2"></i>Детайли и състояние</h5>
+                        <div class="row g-4 mb-5">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-door-open-fill text-neon me-2"></i>Брой врати</label>
+                                {{ form.doors(class="form-select form-select-lg custom-input") }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-shield-check text-neon me-2"></i>Състояние</label>
+                                {{ form.condition(class="form-select form-select-lg custom-input") }}
+                            </div>
                             <div class="col-12">
-                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-pencil-square text-neon me-2"></i>Описание</label>
+                                <label class="form-label fw-bold small text-white-50 text-uppercase"><i class="bi bi-pencil-square text-neon me-2"></i>Описание на автомобила</label>
                                 {{ form.description(class="form-control custom-input", rows="5") }}
                             </div>
                         </div>
@@ -158,6 +178,9 @@
         box-shadow: 0 0 15px rgba(0, 255, 133, 0.1) !important;
     }
 
+    .custom-input-group .custom-input { border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; }
+    .custom-input-group .input-group-text { border-top-right-radius: 8px !important; border-bottom-right-radius: 8px !important; }
+
     /* Управление на снимки */
     .preview-card {
         background: #000;
@@ -198,6 +221,27 @@
 <script>
 const carId = {{ car.id }};
 let deletedImages = [];
+
+// Динамични модели за edit страницата
+const brandSelect = document.getElementById('brand-select');
+const modelSelect = document.getElementById('model-select');
+
+brandSelect.addEventListener('change', function() {
+    const brand = this.value;
+    modelSelect.innerHTML = '<option value="">Зареждане...</option>';
+    if (brand) {
+        fetch(`/api/models/${encodeURIComponent(brand)}`)
+            .then(r => r.json())
+            .then(data => {
+                modelSelect.innerHTML = '<option value="">Изберете модел</option>';
+                data.forEach(m => {
+                    let opt = document.createElement('option');
+                    opt.value = opt.textContent = m;
+                    modelSelect.appendChild(opt);
+                });
+            });
+    }
+});
 
 // Функция за маркиране на изтриване
 function deleteImage(imgId) {

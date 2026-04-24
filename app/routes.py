@@ -11,6 +11,9 @@ from werkzeug.security import generate_password_hash, check_password_hash # Яв
 from functools import wraps
 from app.constants import CAR_BRANDS
 import os 
+import google.generativeai as genai
+
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
 def admin_required(f):
     @wraps(f)
@@ -341,3 +344,31 @@ def search():
 
     cars = query.all()
     return render_template('search.html', cars=cars, form=form)
+
+@bp.route('/api/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    user_message = data.get('message')
+    
+    if not user_message:
+        return jsonify({'error': 'Няма съобщение'}), 400
+
+    try:
+        # 1. Принтираме всички достъпни модели в терминала (за дебъгване)
+        print("--- ДОСТЪПНИ GEMINI МОДЕЛИ ЗА ТОЗИ КЛЮЧ ---")
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                print(m.name)
+        print("-------------------------------------------")
+
+        # 2. Използваме най-стабилния и универсален модел
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        
+        prompt = f"Ти си AI асистент на име AutoMind в сайт за обяви за коли на име CarMarket. Отговаряй кратко, точно и любезно на български език. Потребител: {user_message}"
+        
+        response = model.generate_content(prompt)
+        return jsonify({'response': response.text})
+    except Exception as e:
+        print(f"Gemini Error: {e}")
+        # Връщаме самата грешка към фронтенда, за да я видим в чата
+        return jsonify({'error': str(e)}), 500

@@ -168,7 +168,7 @@
                         <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('routes.my_cars') }}">Моите обяви</a></li>
                         <li class="nav-item ms-lg-3 my-2 my-lg-0">
                             <a class="btn btn-nav-add px-4 py-2 rounded-pill fw-bold" href="{{ url_for('routes.add_car') }}">
-                                <i class="bi bi-plus-lg me-2"></i>Добави кола
+                                <i class="bi bi-plus-lg me-2"></i>Добави обява
                             </a>
                         </li>
                         <li class="nav-item dropdown ms-lg-3">
@@ -229,7 +229,7 @@
                         <span class="text-neon">CAR</span>MARKET
                     </div>
                     <p class="text-white-50 small mb-4 lh-lg" style="max-width: 320px;">
-                        Премиум платформа за покупко-продажба на автомобили. Намерете своя следващ автомобил бързо, лесно и сигурно.
+                        Платформа за покупко-продажба на автомобили. Намерете своя следващ автомобил бързо, лесно и сигурно.
                     </p>
                     <div class="social-links">
                         <a href="#" class="social-icon"><i class="bi bi-facebook fs-5"></i></a>
@@ -275,6 +275,193 @@
             </div>
         </div>
     </footer>
+    <div id="ai-chat-container" class="position-fixed" style="bottom: 30px; right: 30px; z-index: 1050;">
+    
+    <div id="ai-chat-window" class="card glass-card border-0 rounded-4 shadow-lg d-none mb-3" style="width: 350px; height: 450px; display: flex; flex-direction: column; overflow: hidden; transform: translateY(20px); opacity: 0; transition: all 0.3s ease;">
+        
+        <div class="p-3 border-bottom border-secondary border-opacity-25 bg-darker d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-robot fs-4 text-neon me-2"></i>
+                <h6 class="mb-0 fw-bold text-white">Auto <span class="text-neon">Mind</span></h6>
+            </div>
+            <button id="close-chat" class="btn btn-sm text-white-50 hover-neon">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div id="chat-messages" class="p-3 flex-grow-1" style="overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+            <div class="bot-message bg-darker text-white p-3 rounded-3 border border-secondary border-opacity-25" style="align-self: flex-start; max-width: 85%;">
+                Здравей! Аз съм AI асистентът на CarMarket AutoMind. 🚗 Мога ли да ти помогна с търсенето на автомобил или имаш технически въпрос?
+            </div>
+        </div>
+
+        <div class="p-3 border-top border-secondary border-opacity-25 bg-darker">
+            <form id="chat-form" class="input-group">
+                <input type="text" id="chat-input" class="form-control custom-input border-end-0" placeholder="Въведете съобщението си..." autocomplete="off">
+                <button type="submit" class="btn btn-neon px-3" id="send-btn">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <button id="ai-chat-toggle" class="btn btn-neon rounded-circle shadow-lg d-flex align-items-center justify-content-center pulse-neon-btn" style="width: 60px; height: 60px; float: right;">
+        <i class="bi bi-stars fs-3"></i>
+    </button>
+
+</div>
+
+<style>
+    /* Специфични стилове за чата, които надграждат твоя дизайн */
+    .hover-neon:hover { color: #00ff85 !important; }
+    
+    .pulse-neon-btn {
+        box-shadow: 0 0 0 0 rgba(0, 255, 133, 0.4);
+        animation: pulse-btn 2s infinite;
+    }
+
+    @keyframes pulse-btn {
+        0% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0.4); }
+        70% { box-shadow: 0 0 0 15px rgba(0, 255, 133, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0); }
+    }
+
+    .user-message {
+        background-color: rgba(0, 255, 133, 0.15);
+        border: 1px solid rgba(0, 255, 133, 0.3);
+        color: #fff;
+        padding: 10px 15px;
+        border-radius: 12px;
+        align-self: flex-end;
+        max-width: 85%;
+        word-wrap: break-word;
+    }
+
+    /* Скролбар за чата */
+    #chat-messages::-webkit-scrollbar { width: 6px; }
+    #chat-messages::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+    #chat-messages::-webkit-scrollbar-thumb { background: rgba(0, 255, 133, 0.3); border-radius: 10px; }
+    #chat-messages::-webkit-scrollbar-thumb:hover { background: rgba(0, 255, 133, 0.5); }
+    
+    .typing-indicator {
+        display: inline-block;
+        width: 6px; height: 6px;
+        background-color: #00ff85;
+        border-radius: 50%;
+        animation: typing 1s infinite alternate;
+        margin: 0 2px;
+    }
+    .typing-indicator:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes typing {
+        0% { transform: translateY(0); opacity: 0.5; }
+        100% { transform: translateY(-5px); opacity: 1; }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatToggle = document.getElementById('ai-chat-toggle');
+    const chatWindow = document.getElementById('ai-chat-window');
+    const closeChat = document.getElementById('close-chat');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatMessages = document.getElementById('chat-messages');
+
+    // Отваряне/Затваряне на чата
+    function toggleChat() {
+        if (chatWindow.classList.contains('d-none')) {
+            chatWindow.classList.remove('d-none');
+            setTimeout(() => {
+                chatWindow.style.opacity = '1';
+                chatWindow.style.transform = 'translateY(0)';
+                chatInput.focus();
+            }, 10);
+            chatToggle.innerHTML = '<i class="bi bi-x-lg fs-4"></i>';
+            chatToggle.classList.remove('pulse-neon-btn');
+        } else {
+            chatWindow.style.opacity = '0';
+            chatWindow.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                chatWindow.classList.add('d-none');
+            }, 300);
+            chatToggle.innerHTML = '<i class="bi bi-stars fs-3"></i>';
+            chatToggle.classList.add('pulse-neon-btn');
+        }
+    }
+
+    chatToggle.addEventListener('click', toggleChat);
+    closeChat.addEventListener('click', toggleChat);
+
+    // Добавяне на съобщение в UI
+    function appendMessage(text, isUser = false) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = isUser ? 'user-message' : 'bot-message bg-darker text-white p-3 rounded-3 border border-secondary border-opacity-25';
+        if (!isUser) msgDiv.style.alignSelf = 'flex-start';
+        msgDiv.style.maxWidth = '85%';
+        
+        // Използваме textContent за сигурност (XSS защита)
+        msgDiv.textContent = text;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Добавяне на индикатор за писане
+    function showTyping() {
+        const typingDiv = document.createElement('div');
+        typingDiv.id = 'typing-indicator';
+        typingDiv.className = 'bot-message bg-darker p-3 rounded-3 border border-secondary border-opacity-25';
+        typingDiv.style.alignSelf = 'flex-start';
+        typingDiv.innerHTML = '<div class="d-flex"><div class="typing-indicator"></div><div class="typing-indicator"></div><div class="typing-indicator"></div></div>';
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function hideTyping() {
+        const typingDiv = document.getElementById('typing-indicator');
+        if (typingDiv) typingDiv.remove();
+    }
+
+    // Изпращане на съобщение към бекенда
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        // Показваме потребителското съобщение
+        appendMessage(message, true);
+        chatInput.value = '';
+        
+        // Показваме индикатора, че AI "мисли"
+        showTyping();
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+            hideTyping();
+
+            if (response.ok) {
+                appendMessage(data.response);
+            } else {
+                appendMessage('Опа, възникна грешка: ' + (data.error || 'Сървърът не отговаря.'));
+            }
+        } catch (error) {
+            hideTyping();
+            appendMessage('Мрежова грешка. Моля, опитайте отново по-късно.');
+            console.error('Chat error:', error);
+        }
+    });
+});
+</script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>

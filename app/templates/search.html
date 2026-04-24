@@ -98,31 +98,26 @@
                         <div class="col-md-4 col-lg-3">
                             <div class="card h-100 car-card border-0 rounded-4 overflow-hidden bg-darker shadow-sm">
                                 <div class="position-relative img-wrapper">
-                                    {% set ns = namespace(main_img=none) %}
-                                    {% for img in car.images %}
-                                        {% if img.is_main %}
-                                            {% set ns.main_img = img %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    
-                                    {% if not ns.main_img and car.images %}
-                                        {% set ns.main_img = car.images[0] %}
-                                    {% endif %}
+    {% set ns = namespace(main_img=none) %}
+    {% for img in car.images %}
+        {% if img.is_main %}
+            {% set ns.main_img = img %}
+        {% endif %}
+    {% endfor %}
+    
+    {% if not ns.main_img and car.images %}
+        {% set ns.main_img = car.images[0] %}
+    {% endif %}
 
-                                    {% if ns.main_img %}
-                                        <img src="{{ url_for('static', filename='uploads/cars/' + ns.main_img.filename) }}" class="card-img-top car-img" alt="{{ car.brand }}">
-                                    {% else %}
-                                        <img src="https://via.placeholder.com/400x300/161b22/ffffff?text=No+Image" class="card-img-top car-img" alt="No image">
-                                    {% endif %}
+    {% if ns.main_img %}
+        <img src="{{ url_for('static', filename='uploads/cars/' + ns.main_img.filename) }}" class="card-img-top car-img" alt="{{ car.brand }}">
+    {% else %}
+        <img src="https://via.placeholder.com/400x300/161b22/ffffff?text=No+Image" class="card-img-top car-img" alt="Няма снимка">
+    {% endif %}
 
-                                    {% if main_img %}
-                                        <img src="{{ url_for('static', filename='uploads/cars/' + main_img.filename) }}" class="card-img-top car-img" alt="{{ car.brand }}">
-                                    {% else %}
-                                        <img src="https://via.placeholder.com/400x300/161b22/ffffff?text=No+Image" class="card-img-top car-img" alt="No image">
-                                    {% endif %}
-                                    <div class="img-overlay"></div>
-                                    <div class="price-badge">{{ car.price }} €</div>
-                                </div>
+    <div class="img-overlay"></div>
+    <div class="price-badge">{{ car.price }} €</div>
+</div>
                                 <div class="card-body p-4 d-flex flex-column">
                                     <h5 class="card-title fw-bolder text-white mb-3 text-truncate">{{ car.brand }} {{ car.model }}</h5>
                                     
