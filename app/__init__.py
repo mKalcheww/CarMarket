@@ -39,5 +39,6 @@ def create_app(config_class=Config):
         upload_path = os.path.join(app.static_folder, 'uploads', 'cars')
         if not os.path.exists(upload_path):
             os.makedirs(upload_path, exist_ok=True)
+            from app import routes
 
     return app

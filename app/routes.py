@@ -5,13 +5,12 @@ from .models import User, Car, CarImage, db
 from .forms import RegistrationForm, LoginForm, CarForm, SearchForm
 from werkzeug.utils import secure_filename
 import os
+import google.generativeai as genai
 import time
 from sqlalchemy.orm import joinedload
 from werkzeug.security import generate_password_hash, check_password_hash # Явен импорт на security функциите
 from functools import wraps
 from app.constants import CAR_BRANDS
-import os 
-import google.generativeai as genai
 
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
