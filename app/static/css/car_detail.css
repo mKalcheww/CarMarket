@@ -1,0 +1,99 @@
+    /* Глобални стилове */
+    body { background-color: #050505 !important; color: #e0e0e0 !important; font-family: 'Inter', sans-serif; }
+    .text-neon { color: #00ff85 !important; }
+    .bg-neon { background-color: #00ff85 !important; }
+    .bg-darker { background-color: rgba(10, 12, 16, 0.6) !important; }
+    
+    /* Стъклен ефект */
+    .glass-card {
+        background: rgba(22, 27, 34, 0.6) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    
+    .glass-glow.bg-center {
+        position: fixed;
+        top: 20%; left: 30%;
+        transform: translate(-50%, -50%);
+        width: 60vw; height: 60vh;
+        background: #00ff85;
+        filter: blur(150px);
+        opacity: 0.05;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .price-card .card-glow {
+        position: absolute;
+        top: -20px; right: -20px;
+        width: 150px; height: 150px;
+        background: #00ff85;
+        filter: blur(60px);
+        opacity: 0.2;
+        border-radius: 50%;
+    }
+
+    /* Снимки и Каросел */
+    .img-overlay-bottom {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 30%;
+        background: linear-gradient(to top, rgba(10, 12, 16, 0.9) 0%, rgba(10, 12, 16, 0) 100%);
+        pointer-events: none;
+    }
+    
+    .cursor-zoom-in { cursor: zoom-in; }
+    
+    .custom-carousel-btn { width: 10%; background: transparent; transition: 0.3s; }
+    .custom-carousel-btn:hover { background: rgba(0,0,0,0.3); }
+
+    .thumbnail-box { 
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        opacity: 0.7;
+    }
+    .thumbnail-box:hover { 
+        border-color: #00ff85 !important; 
+        opacity: 1;
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 255, 133, 0.2) !important;
+    }
+
+    /* Бутони */
+    .btn-neon { 
+        background: #00ff85 !important; 
+        color: #050505 !important;
+        border: 2px solid #00ff85 !important;
+        transition: all 0.3s ease;
+    }
+    .btn-neon:hover { 
+        background: #00e677 !important; 
+        border-color: #00e677 !important;
+        box-shadow: 0 0 20px rgba(0, 255, 133, 0.4);
+    }
+    
+    .btn-outline-neon { 
+        background: transparent !important;
+        color: #00ff85 !important;
+        border: 2px solid #00ff85 !important;
+        transition: all 0.3s ease;
+    }
+    .btn-outline-neon:hover {
+        background: rgba(0, 255, 133, 0.1) !important;
+        box-shadow: 0 0 15px rgba(0, 255, 133, 0.2);
+    }
+
+    .shadow-neon { box-shadow: 0 0 15px rgba(0, 255, 133, 0.3); }
+
+    .btn-animated { animation: pulse-neon 2s infinite; }
+    @keyframes pulse-neon {
+        0% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0.5); }
+        70% { box-shadow: 0 0 0 15px rgba(0, 255, 133, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0); }
+    }
+
+    .contact-hover:hover {
+        background: rgba(255,255,255,0.1);
+        color: #fff !important;
+    }

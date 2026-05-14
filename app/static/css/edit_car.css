@@ -1,0 +1,79 @@
+    /* Глобални стилове */
+    body { background-color: #050505 !important; color: #e0e0e0 !important; font-family: 'Inter', sans-serif; }
+    .text-neon { color: #00ff85 !important; }
+    .bg-neon { background-color: #00ff85 !important; }
+    .bg-darker { background-color: rgba(10, 12, 16, 0.6) !important; }
+    .transition-300 { transition: all 0.3s ease; }
+    
+    /* Glassmorphism */
+    .glass-card {
+        background: rgba(22, 27, 34, 0.6) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    
+    .glass-glow {
+        position: absolute;
+        top: -50px; left: 50%;
+        transform: translateX(-50%);
+        width: 60%; height: 100px;
+        background: #00ff85;
+        filter: blur(80px);
+        opacity: 0.12;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    /* Инпути */
+    .custom-input { 
+        background-color: rgba(13, 17, 23, 0.8) !important; 
+        border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+        color: #fff !important; 
+        border-radius: 8px !important;
+        transition: all 0.3s ease;
+    }
+
+    .custom-input:focus { 
+        border-color: #00ff85 !important; 
+        box-shadow: 0 0 15px rgba(0, 255, 133, 0.1) !important;
+    }
+
+    .custom-input-group .custom-input { border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; }
+    .custom-input-group .input-group-text { border-top-right-radius: 8px !important; border-bottom-right-radius: 8px !important; }
+
+    /* Управление на снимки */
+    .preview-card {
+        background: #000;
+        border: 1px solid rgba(0, 255, 133, 0.1) !important;
+        height: 150px;
+    }
+    .preview-img { height: 100%; width: 100%; object-fit: cover; }
+    
+    .preview-card:hover .action-overlay { opacity: 1 !important; background: rgba(0,0,0,0.4); }
+    
+    .custom-dropzone {
+        border: 2px dashed rgba(0, 255, 133, 0.3);
+        background: rgba(0, 255, 133, 0.02);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .custom-dropzone:hover {
+        background: rgba(0, 255, 133, 0.08);
+        border-color: #00ff85;
+    }
+
+    /* Бутони */
+    .btn-neon { 
+        background: #00ff85 !important; 
+        color: #050505 !important;
+        border: none !important;
+    }
+    .btn-neon:hover { 
+        background: #00e677 !important; 
+        box-shadow: 0 0 20px rgba(0, 255, 133, 0.3);
+        transform: translateY(-2px);
+    }
+    .shadow-neon { box-shadow: 0 0 15px rgba(0, 255, 133, 0.2); }
+    
+    .border-neon-soft { border: 1px solid rgba(0, 255, 133, 0.2) !important; }

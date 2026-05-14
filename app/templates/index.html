@@ -2,9 +2,14 @@
 
 {% block title %}Начало{% endblock %}
 
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+
 {% block content %}
 
-<section class="hero-video-section position-relative overflow-hidden vh-100" style="margin-top: -80px;"> <video autoplay muted loop playsinline class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover z-0">
+<section class="hero-video-section position-relative overflow-hidden vh-100" style="margin-top: -80px;"> 
+    <video autoplay muted loop playsinline class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover z-0">
         <source src="{{ url_for('static', filename='video/hero.mp4') }}" type="video/mp4">
     </video>
 
@@ -123,123 +128,5 @@
     </div>
     {% endif %}
 </div>
-
-<style>
-    /* Бутони в Hero */
-    .btn-neon { 
-        background: #00ff85 !important; 
-        color: #050505 !important;
-        border: none !important;
-        transition: all 0.3s ease;
-    }
-    .btn-neon:hover { 
-        background: #00e677 !important; 
-        box-shadow: 0 0 25px rgba(0, 255, 133, 0.4);
-        transform: translateY(-3px);
-    }
-    
-    .btn-animated { animation: pulse-neon 2s infinite; }
-    @keyframes pulse-neon {
-        0% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0.4); }
-        70% { box-shadow: 0 0 0 15px rgba(0, 255, 133, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0); }
-    }
-
-    .hover-lift { transition: transform 0.3s ease; }
-    .hover-lift:hover { transform: translateY(-3px); background: rgba(255,255,255,0.1); }
-
-    .text-shadow { text-shadow: 0 4px 20px rgba(0,0,0,0.8); }
-    .fw-black { font-weight: 900; }
-
-    /* Стъклени Карти за Колите */
-    .bg-darker { background-color: #0a0c10 !important; }
-    
-    .glass-card {
-        background: rgba(22, 27, 34, 0.6) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
-
-    .car-card { 
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-    }
-    .car-card:hover { 
-        transform: translateY(-10px); 
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 255, 133, 0.15);
-        border-color: rgba(0, 255, 133, 0.3) !important;
-    }
-
-    /* Снимки в картите */
-    .img-wrapper { overflow: hidden; border-radius: 1rem 1rem 0 0; }
-    .car-img { 
-        height: 220px; 
-        object-fit: cover; 
-        transition: transform 0.6s ease; 
-    }
-    .car-card:hover .car-img { transform: scale(1.08); }
-
-    .img-overlay {
-        position: absolute;
-        bottom: 0; left: 0; right: 0;
-        height: 60%;
-        background: linear-gradient(to top, rgba(10, 12, 16, 0.95) 0%, rgba(10, 12, 16, 0) 100%);
-        pointer-events: none;
-    }
-
-    .price-badge {
-        position: absolute;
-        bottom: 15px; right: 15px;
-        background: #00ff85;
-        color: #050505;
-        padding: 6px 16px;
-        border-radius: 8px;
-        font-weight: 900;
-        font-size: 1.15rem;
-        box-shadow: 0 4px 15px rgba(0, 255, 133, 0.3);
-    }
-
-    /* Характеристики в картата */
-    .car-info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-    }
-    .info-badge {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        padding: 6px 10px;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        color: #b0b3b8;
-        display: flex;
-        align-items: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .btn-outline-neon { 
-        border: 2px solid #00ff85 !important; 
-        color: #00ff85 !important; 
-        background: transparent;
-        transition: all 0.3s ease;
-    }
-    .car-card:hover .btn-outline-neon { 
-        background: #00ff85 !important; 
-        color: #050505 !important; 
-    }
-
-    .hover-neon-border {
-        border: 2px solid rgba(255,255,255,0.2) !important;
-        transition: all 0.3s;
-    }
-    .hover-neon-border:hover {
-        border-color: #00ff85 !important;
-        background: rgba(0, 255, 133, 0.05) !important;
-        color: #fff !important;
-        transform: translateY(-3px);
-    }
-</style>
 
 {% endblock %}

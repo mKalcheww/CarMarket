@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Моите обяви – CarMarket{% endblock %}
 
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/my_cars.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="container py-5 min-vh-100 search-page-wrapper">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-5 position-relative z-1">
@@ -105,135 +109,4 @@
     
     <div class="glass-glow bg-center"></div>
 </div>
-
-<style>
-    /* Глобални цветове */
-    body { background-color: #050505 !important; color: #e0e0e0 !important; font-family: 'Inter', 'Segoe UI', sans-serif; }
-    .text-neon { color: #00ff85 !important; }
-    .bg-neon { background-color: #00ff85 !important; }
-    .bg-darker { background-color: rgba(10, 12, 16, 0.6) !important; }
-    
-    /* Стъклен ефект */
-    .glass-card {
-        background: rgba(22, 27, 34, 0.6) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-    }
-    
-    .glass-glow.bg-center {
-        position: fixed;
-        top: 30%; left: 50%;
-        transform: translate(-50%, -50%);
-        width: 50vw; height: 50vh;
-        background: #00ff85;
-        filter: blur(150px);
-        opacity: 0.05;
-        z-index: 0;
-        pointer-events: none;
-    }
-
-    /* Хоризонтални карти */
-    .car-horizontal-card {
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .car-horizontal-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 255, 133, 0.15);
-        border-color: rgba(0, 255, 133, 0.3) !important;
-    }
-
-    /* Снимки и Zoom ефект */
-    .img-wrapper { overflow: hidden; }
-    .car-img { transition: transform 0.6s ease; min-height: 250px; }
-    .car-horizontal-card:hover .car-img { transform: scale(1.08); }
-    
-    .img-overlay-horizontal {
-        position: absolute;
-        top: 0; bottom: 0; right: 0;
-        width: 30%;
-        background: linear-gradient(to right, rgba(22, 27, 34, 0) 0%, rgba(22, 27, 34, 0.6) 100%);
-        pointer-events: none;
-    }
-
-    /* Баджове за характеристики */
-    .car-info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-    .info-badge {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        color: #b0b3b8;
-        display: flex;
-        align-items: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    /* Бутони */
-    .btn-neon { 
-        background: #00ff85 !important; 
-        color: #050505 !important;
-        border: none !important;
-        transition: all 0.3s ease;
-    }
-    .btn-neon:hover { 
-        background: #00e677 !important; 
-        box-shadow: 0 0 25px rgba(0, 255, 133, 0.4);
-        transform: translateY(-2px);
-    }
-    
-    .btn-animated { animation: pulse-neon 2s infinite; }
-
-    @keyframes pulse-neon {
-        0% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0.4); }
-        70% { box-shadow: 0 0 0 15px rgba(0, 255, 133, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0); }
-    }
-
-    .btn-outline-neon { 
-        border: 2px solid #00ff85 !important; 
-        color: #00ff85 !important; 
-        background: transparent;
-        transition: all 0.3s ease;
-    }
-    .btn-outline-neon:hover { 
-        background: #00ff85 !important; 
-        color: #050505 !important; 
-        box-shadow: 0 0 15px rgba(0, 255, 133, 0.3);
-    }
-
-    .custom-btn-hover:hover { transform: translateY(-2px); }
-
-    .custom-delete-btn {
-        border: 2px solid #dc3545 !important;
-        color: #dc3545 !important;
-        background: transparent;
-        transition: all 0.3s ease;
-    }
-    .custom-delete-btn:hover {
-        background: #dc3545 !important;
-        color: #fff !important;
-        box-shadow: 0 0 15px rgba(220, 53, 69, 0.4);
-        transform: translateY(-2px);
-    }
-    
-    /* Empty state */
-    .empty-state-icon i {
-        animation: float 3s ease-in-out infinite;
-        display: inline-block;
-    }
-    @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-15px); }
-        100% { transform: translateY(0px); }
-    }
-</style>
 {% endblock %}

@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}{{ car.brand }} {{ car.model }} - CarMarket{% endblock %}
+{% block title %}
+    {{ car.brand }} {{ car.model }} - CarMarket
+{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/car_detail.css') }}">
+{% endblock %}
 
 {% block content %}
 <div class="container py-5 min-vh-100 search-page-wrapper position-relative">
@@ -149,10 +155,10 @@
                 </div>
                 
                 <div class="d-grid gap-3">
-                    <button type="button" class="btn btn-neon btn-animated rounded-pill fw-bold text-dark py-3" id="phoneButton">
+                    <button type="button" class="btn btn-neon btn-animated rounded-pill fw-bold text-dark py-3" id="phoneButton" data-phone="{{ car.author.phone_number }}">
                         <i class="bi bi-telephone-fill me-2"></i>Покажи телефон
                     </button>
-                    <button type="button" class="btn btn-outline-light rounded-pill py-3 fw-bold contact-hover" id="emailButton">
+                    <button type="button" class="btn btn-outline-light rounded-pill py-3 fw-bold contact-hover" id="emailButton" data-email="{{ car.author.email }}">
                         <i class="bi bi-envelope-at-fill me-2"></i>Покажи имейл
                     </button>
                 </div>
@@ -174,7 +180,7 @@
                     </div>
                     {% if current_user.is_admin and current_user.id != car.author.id %}
                         <div class="text-center mt-3 text-warning small fw-bold bg-warning bg-opacity-10 rounded-3 py-2">
-                            <i class="bi bi-info-circle-fill me-1"></i> Виждате това като Администратор
+                            <i class="bi bi-info-circle-fill me-1"></i> Виждате това как Администратор
                         </div>
                     {% endif %}
                 </div>
@@ -203,167 +209,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
-<style>
-    /* Глобални стилове */
-    body { background-color: #050505 !important; color: #e0e0e0 !important; font-family: 'Inter', sans-serif; }
-    .text-neon { color: #00ff85 !important; }
-    .bg-neon { background-color: #00ff85 !important; }
-    .bg-darker { background-color: rgba(10, 12, 16, 0.6) !important; }
-    
-    /* Стъклен ефект */
-    .glass-card {
-        background: rgba(22, 27, 34, 0.6) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-    }
-    
-    .glass-glow.bg-center {
-        position: fixed;
-        top: 20%; left: 30%;
-        transform: translate(-50%, -50%);
-        width: 60vw; height: 60vh;
-        background: #00ff85;
-        filter: blur(150px);
-        opacity: 0.05;
-        z-index: 0;
-        pointer-events: none;
-    }
-
-    .price-card .card-glow {
-        position: absolute;
-        top: -20px; right: -20px;
-        width: 150px; height: 150px;
-        background: #00ff85;
-        filter: blur(60px);
-        opacity: 0.2;
-        border-radius: 50%;
-    }
-
-    /* Снимки и Каросел */
-    .img-overlay-bottom {
-        position: absolute;
-        bottom: 0; left: 0; right: 0;
-        height: 30%;
-        background: linear-gradient(to top, rgba(10, 12, 16, 0.9) 0%, rgba(10, 12, 16, 0) 100%);
-        pointer-events: none;
-    }
-    
-    .cursor-zoom-in { cursor: zoom-in; }
-    
-    .custom-carousel-btn { width: 10%; background: transparent; transition: 0.3s; }
-    .custom-carousel-btn:hover { background: rgba(0,0,0,0.3); }
-
-    .thumbnail-box { 
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        opacity: 0.7;
-    }
-    .thumbnail-box:hover { 
-        border-color: #00ff85 !important; 
-        opacity: 1;
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0, 255, 133, 0.2) !important;
-    }
-
-    /* Бутони */
-    .btn-neon { 
-        background: #00ff85 !important; 
-        color: #050505 !important;
-        border: 2px solid #00ff85 !important;
-        transition: all 0.3s ease;
-    }
-    .btn-neon:hover { 
-        background: #00e677 !important; 
-        border-color: #00e677 !important;
-        box-shadow: 0 0 20px rgba(0, 255, 133, 0.4);
-    }
-    
-    .btn-outline-neon { 
-        background: transparent !important;
-        color: #00ff85 !important;
-        border: 2px solid #00ff85 !important;
-        transition: all 0.3s ease;
-    }
-    .btn-outline-neon:hover {
-        background: rgba(0, 255, 133, 0.1) !important;
-        box-shadow: 0 0 15px rgba(0, 255, 133, 0.2);
-    }
-
-    .shadow-neon { box-shadow: 0 0 15px rgba(0, 255, 133, 0.3); }
-
-    .btn-animated { animation: pulse-neon 2s infinite; }
-    @keyframes pulse-neon {
-        0% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0.5); }
-        70% { box-shadow: 0 0 0 15px rgba(0, 255, 133, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0); }
-    }
-
-    .contact-hover:hover {
-        background: rgba(255,255,255,0.1);
-        color: #fff !important;
-    }
-</style>
-
-<script>
-    const allImages = [
-        {% for img in car.images %}
-            "{{ url_for('static', filename='uploads/cars/' + img.filename) }}"{% if not loop.last %},{% endif %}
-        {% endfor %}
-    ];
-
-    let currentImageIndex = 0;
-
-    function openLightbox(index) {
-        currentImageIndex = index;
-        updateLightboxImage();
-        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('lightboxModal'));
-        modal.show();
-    }
-
-    function changeLightbox(direction) {
-        currentImageIndex += direction;
-        if (currentImageIndex >= allImages.length) currentImageIndex = 0;
-        if (currentImageIndex < 0) currentImageIndex = allImages.length - 1;
-        updateLightboxImage();
-    }
-
-    function updateLightboxImage() {
-        document.getElementById('lightboxImage').src = allImages[currentImageIndex];
-    }
-
-    function goToSlide(index) {
-        const carousel = bootstrap.Carousel.getOrCreateInstance(document.getElementById('carCarousel'));
-        carousel.to(index);
-    }
-
-    document.addEventListener('keydown', function(e) {
-        const modalEl = document.getElementById('lightboxModal');
-        if (modalEl.classList.contains('show')) {
-            if (e.key === "ArrowLeft") changeLightbox(-1);
-            if (e.key === "ArrowRight") changeLightbox(1);
-        }
-    });
-
-    // Бутони за контакт с ефект при разкриване
-    document.getElementById('phoneButton')?.addEventListener('click', function() {
-        const phone = "{{ car.author.phone_number }}";
-        if (phone && phone !== 'None') {
-             this.innerHTML = '<i class="bi bi-telephone-fill me-2"></i>' + phone;
-             // Сменяме стила, за да покажем, че е разкрито
-             this.classList.remove('btn-animated', 'btn-neon');
-             this.classList.add('btn-outline-neon');
-        } else {
-             this.innerHTML = 'Няма посочен телефон';
-             this.classList.remove('btn-animated');
-        }
-    });
-
-    document.getElementById('emailButton')?.addEventListener('click', function() {
-        this.innerHTML = '<i class="bi bi-envelope-fill me-2"></i>' + "{{ car.author.email }}";
-        this.classList.remove('btn-outline-light');
-        this.classList.add('btn-outline-neon');
-    });
-</script>
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/car_detail.js') }}"></script>
 {% endblock %}

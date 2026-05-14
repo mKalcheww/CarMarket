@@ -1,0 +1,101 @@
+    /* Глобални цветове и стъклен ефект */
+    body { background-color: #050505 !important; color: #e0e0e0 !important; font-family: 'Inter', 'Segoe UI', sans-serif; }
+    .text-neon { color: #00ff85 !important; }
+    .bg-neon { background-color: #00ff85 !important; }
+    .bg-darker { background-color: #0a0c10 !important; }
+    
+    .glass-card {
+        background: rgba(22, 27, 34, 0.6) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    
+    .glass-glow {
+        position: absolute;
+        top: -50px; left: 50%;
+        transform: translateX(-50%);
+        width: 60%; height: 100px;
+        background: #00ff85;
+        filter: blur(80px);
+        opacity: 0.15;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    /* Инпути */
+    .custom-input { 
+        background-color: rgba(13, 17, 23, 0.8) !important; 
+        border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+        color: #fff !important; 
+        border-radius: 8px !important;
+        transition: all 0.3s ease;
+    }
+
+    .custom-input:focus { 
+        border-color: #00ff85 !important; 
+        box-shadow: 0 0 15px rgba(0, 255, 133, 0.15) !important; 
+        background-color: #0d1117 !important;
+    }
+
+    .custom-input-group .custom-input { border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; }
+    .custom-input-group .input-group-text { border-top-right-radius: 8px !important; border-bottom-right-radius: 8px !important; }
+
+    /* Dropzone (Зона за качване) */
+    .custom-dropzone {
+        border: 2px dashed rgba(0, 255, 133, 0.4);
+        background: rgba(0, 255, 133, 0.02);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .custom-dropzone:hover, .custom-dropzone.dragover {
+        background: rgba(0, 255, 133, 0.08);
+        border-color: #00ff85;
+        box-shadow: inset 0 0 20px rgba(0, 255, 133, 0.1);
+    }
+    
+    .dropzone-icon { transition: transform 0.3s ease; }
+    .custom-dropzone:hover .dropzone-icon { transform: translateY(-5px); }
+
+    /* Превю на качени снимки */
+    .preview-card { 
+        position: relative; 
+        border-radius: 12px; 
+        overflow: hidden; 
+        border: 1px solid rgba(0, 255, 133, 0.3); 
+        background: #000;
+    }
+    .preview-img { 
+        height: 140px; 
+        width: 100%; 
+        object-fit: cover; 
+        opacity: 0.8;
+        transition: opacity 0.3s;
+    }
+    .preview-card:hover .preview-img { opacity: 1; }
+
+    /* Анимиран бутон */
+    .btn-neon { 
+        background: #00ff85 !important; 
+        color: #050505 !important;
+        border: none !important;
+        transition: all 0.3s ease;
+    }
+    .btn-neon:hover { 
+        background: #00e677 !important; 
+        box-shadow: 0 0 25px rgba(0, 255, 133, 0.5);
+        transform: translateY(-2px);
+    }
+    
+    .btn-animated { animation: pulse-neon 2s infinite; }
+
+    @keyframes pulse-neon {
+        0% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0.4); }
+        70% { box-shadow: 0 0 0 15px rgba(0, 255, 133, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 255, 133, 0); }
+    }
+    
+    .fade-in { animation: fadeIn 0.5s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }

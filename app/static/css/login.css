@@ -1,0 +1,35 @@
+    .glass-card {
+        background: rgba(22, 27, 34, 0.6) !important;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .custom-input {
+        background-color: rgba(13, 17, 23, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .custom-input::placeholder { color: rgba(255, 255, 255, 0.2) !important; }
+
+    .custom-input:focus {
+        border-color: #00ff85 !important;
+        background-color: #0d1117 !important;
+        box-shadow: 0 0 15px rgba(0, 255, 133, 0.15) !important;
+    }
+
+    .hover-neon-link { position: relative; transition: 0.3s; }
+    .hover-neon-link:hover { text-shadow: 0 0 10px rgba(0, 255, 133, 0.8); }
+    
+    .tracking-wide { letter-spacing: 0.5px; }
+
+    /* Фикс за Auto-fill от браузъра */
+    input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus {
+        -webkit-text-fill-color: #ffffff !important;
+        -webkit-box-shadow: 0 0 0px 1000px #0d1117 inset !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
