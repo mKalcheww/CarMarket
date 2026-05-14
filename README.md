@@ -6,7 +6,7 @@ Make sure you have Python 3.10 or a more recent version installed on your operat
 
 1. Clone the Repository
 Bash
-git clone [https://github.com/yourusername/CarMarket.git](https://github.com/yourusername/CarMarket.git)
+git clone [https://github.com/yourusername/CarMarket.git](https://github.com/mKalcheww/CarMarket.git)
 cd CarMarket
 2. Configure the Virtual Environment
 Create and activate an isolated development virtual environment:
